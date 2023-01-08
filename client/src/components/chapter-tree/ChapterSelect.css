@@ -1,0 +1,11 @@
+.chapter-table {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.chapter-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

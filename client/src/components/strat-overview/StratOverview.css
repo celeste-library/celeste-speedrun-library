@@ -1,0 +1,14 @@
+.strat-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.preview-wrapper {
+  margin-right: 10px;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  text-align: center;
+  display: flex;
+  min-width: 200px;
+}

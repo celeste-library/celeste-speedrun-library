@@ -1,0 +1,12 @@
+.chapter-box {
+    display: flex;
+    flex-direction: column;
+    max-width: 180px;
+    align-items: center;
+    text-align: center;
+    margin: 10px;
+}
+
+.chapter-thumbnail {
+    max-width: 100%;
+}

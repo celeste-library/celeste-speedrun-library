@@ -1,0 +1,5 @@
+connexion==2.14.1
+Flask==2.2.2
+gunicorn==20.1.0
+mariadb==1.1.4
+SQLAlchemy==1.4.42

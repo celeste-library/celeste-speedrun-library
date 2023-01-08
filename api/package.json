@@ -1,0 +1,10 @@
+{
+  "name": "api-code-generator",
+  "version": "0.1.0",
+  "scripts": {
+    "generate": "openapi-generator-cli generate"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.5.2"
+  }
+}

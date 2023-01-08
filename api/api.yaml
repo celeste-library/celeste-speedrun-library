@@ -1,0 +1,254 @@
+openapi: 3.0.0
+
+info:
+  title: Celeste Speedrun Library
+  description: Digital Library covering all things Celeste speedrunning.
+  version: 0.1.0
+
+servers:
+  - url: "/api"
+
+paths:
+  /status:
+    get:
+      summary: Healthcheck
+      description: Check that the API is up and running
+      operationId: get_api_status
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Always true
+  /chapters:
+    get:
+      summary: List all chapters
+      description: List all chapters, including B-Sides and C-Sides, in vanilla Celeste
+      operationId: get_chapters
+#      parameters:
+#        - name: status
+#          in: query
+#          description: Status values that need to be considered for filter
+#          required: true
+#          style: form
+#          explode: false
+#          deprecated: true
+#          schema:
+#            type: array
+#            items:
+#              type: string
+#              enum:
+#                - available
+#                - pending
+#                - sold
+#              default: available
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chapter'
+        '400':
+          description: Invalid request
+  /checkpoints:
+    get:
+      summary: List all checkpoints for the specified chapter
+      operationId: get_checkpoints
+      parameters:
+        - name: chapter
+          in: query
+          description: Token of the chapter to list checkpoints for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Checkpoint'
+        '400':
+          description: Invalid request
+  /rooms:
+    get:
+      summary: List all rooms for the specified checkpoint
+      operationId: get_rooms
+      parameters:
+        - name: checkpoint
+          in: query
+          description: Token of the checkpoint to list rooms for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'
+        '400':
+          description: Invalid request
+  /categories:
+    get:
+      summary: List speedrun categories
+      operationId: get_categories
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+  /strats:
+    get:
+      summary: List all known strats for the specified room
+      operationId: get_strats
+      parameters:
+        - name: chapter
+          in: query
+          description: Token of the chapter the room is in
+          required: true
+          schema:
+            type: string
+        - name: room
+          in: query
+          description: Debug code of the room
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Speedrun category to filter strats by
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Strat'
+        '400':
+          description: Invalid request
+
+
+components:
+  schemas:
+    Chapter:
+      title: Chapter
+      description: A chapter
+      type: object
+      properties:
+        token:
+          type: string
+          description: Unique identifier for the chapter
+        name:
+          type: string
+          description: Full chapter name
+        group:
+          type: string
+          description: Name of the chapter group
+        side:
+          type: string
+          description: Side of the Chapter
+          enum:
+            - A
+            - B
+            - C
+        image:
+          type: string
+          description: Image representing the chapter
+      required:
+        - token
+        - name
+    Checkpoint:
+      title: Checkpoint
+      description: A checkpoint in a chapter
+      type: object
+      properties:
+        token:
+          type: string
+          description: Unique identifier for the checkpoint
+        name:
+          type: string
+          description: Checkpoint name
+        image:
+          type: string
+          description: Image representing the checkpoint
+      required:
+        - token
+        - name
+    Room:
+      title: Room
+      description: A single room
+      type: object
+      properties:
+        code:
+          type: string
+          description: Debug code of the room
+        connected:
+          type: array
+          items:
+            type: string
+          description: The rooms connected to this one
+        image:
+          type: string
+          description: Image representing the room
+      required:
+        - code
+        - connected
+    Category:
+      title: Speedrun Category
+      description: A category of speedrun
+      type: object
+      properties:
+        token:
+          type: string
+          description: Unique identifier for the category
+        name:
+          type: string
+          description: Category name
+      required:
+        - token
+        - name
+    Strat:
+      title: Strat
+      description: A strategy for some portion of a speedrun
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        notes:
+          type: string
+        start:
+          type: string
+        end:
+          type: string
+    Filters:
+      title: Filters
+      description: Filters for narrowing down selections
+      type: object
+      properties:
+        category:
+          type: string

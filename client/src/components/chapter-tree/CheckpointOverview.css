@@ -1,0 +1,11 @@
+.checkpoint-box {
+    display: flex;
+    flex-direction: column;
+    width: 360px;
+    align-items: center;
+    margin: 10px;
+}
+
+.checkpoint-thumbnail {
+    max-width: 100%;
+}
