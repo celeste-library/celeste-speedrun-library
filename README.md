@@ -1,4 +1,4 @@
-### Setup
+## Development setup
 
 To get the assets for development:
 ```
