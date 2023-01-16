@@ -2,9 +2,9 @@ from pathlib import PurePosixPath
 
 from sqlalchemy.orm import Session
 
-from server.config import WEB_METADATA_IMAGE_ROOT
-from server.database import repository
-from server.database.connector import engine
+from config import WEB_METADATA_IMAGE_ROOT
+from database import repository
+from database.connector import engine
 
 
 def get_api_status():

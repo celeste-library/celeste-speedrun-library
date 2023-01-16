@@ -2,11 +2,11 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
+import service
 from config import METADATA_DIR, SPEEDRUN_DATA_DIR
 from database.connector import engine
 from database.loader import load_all_data
 from database.tables import Base
-from server import service
 
 
 def initial_database_setup():
