@@ -1,4 +1,4 @@
-import {Card, CardContent, CardHeader} from '@mui/material';
+import {Card, CardContent, CardHeader, Grid} from '@mui/material';
 import React from 'react';
 import {Room} from '../../generated';
 import {RoomOverview} from './RoomOverview';
@@ -14,9 +14,13 @@ export function RoomSelect({rooms, onRoomSelect}: Props) {
       <Card>
         <CardHeader title="Rooms"/>
         <CardContent>
-          <div className="room-group">
-            {rooms.map(room => <RoomOverview room={room} key={room.code} onClick={onRoomSelect}></RoomOverview>)}
-          </div>
+          <Grid container rowSpacing={2} columnSpacing={2}>
+            {rooms.map(room =>
+                <Grid item key={room.code} xs={3}>
+                  <RoomOverview room={room} onClick={onRoomSelect}></RoomOverview>
+                </Grid>,
+            )}
+          </Grid>
         </CardContent>
       </Card>
   );

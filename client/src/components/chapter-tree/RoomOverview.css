@@ -1,9 +1,7 @@
 .room-box {
   display: flex;
   flex-direction: column;
-  width: 360px;
   align-items: center;
-  margin: 10px;
 }
 
 .room-thumbnail {

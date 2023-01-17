@@ -19,7 +19,9 @@ export function ChapterSelect({chapters, onChapterSelect}: Props) {
           {groupedChapters.toList().map((chapterGroup, index) =>
               <div className="chapter-group" key={index}>
                 {chapterGroup.toList().map((chapter, index) =>
-                    <ChapterOverview key={index} chapter={chapter} onClick={onChapterSelect}></ChapterOverview>,
+                    <div className="chapter-tile" key={index}>
+                      <ChapterOverview chapter={chapter} onClick={onChapterSelect}></ChapterOverview>
+                    </div>
                 )}
               </div>,
           )}
