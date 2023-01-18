@@ -19,4 +19,5 @@ def checkpoint(chapter: Chapter, checkpoint_number: int, name: str) -> Checkpoin
 
 
 def room(checkpoint: Checkpoint, code: str, nickname: str) -> Room:
-    return Room(code=code, nickname=nickname, checkpoint=checkpoint, chapter=checkpoint.chapter)
+    token = checkpoint.chapter.token + '-' + code
+    return Room(token=token, code=code, nickname=nickname, checkpoint=checkpoint, chapter=checkpoint.chapter)

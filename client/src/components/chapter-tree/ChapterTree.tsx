@@ -1,6 +1,6 @@
 import {Breadcrumbs, Container, Link} from '@mui/material';
-import React, {useEffect, useState} from 'react';
-import {Category, Chapter, Checkpoint, DefaultApi, DefaultApiInterface, Filters, Room} from '../../generated';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Chapter, Checkpoint, DefaultApi, DefaultApiInterface, Filters, Room} from '../../generated';
 import {ChapterSelect} from './ChapterSelect';
 import {CheckpointSelect} from './CheckpointSelect';
 import {RoomDetails} from './RoomDetails';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function ChapterTree({filters}: Props) {
-  const api: DefaultApiInterface = new DefaultApi();
+  const api: DefaultApiInterface = useMemo(() => new DefaultApi(), []);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -21,7 +21,7 @@ export function ChapterTree({filters}: Props) {
 
   useEffect(() => {
     api.getChapters().then(setChapters);
-  }, []);
+  }, [api]);
 
   useEffect(() => {
     setSelectedRoom(undefined);
@@ -31,7 +31,7 @@ export function ChapterTree({filters}: Props) {
     } else {
       setCheckpoints([]);
     }
-  }, [selectedChapter]);
+  }, [selectedChapter, api]);
 
   useEffect(() => {
     setSelectedRoom(undefined);
@@ -42,9 +42,9 @@ export function ChapterTree({filters}: Props) {
     } else {
       setRooms([]);
     }
-  }, [selectedCheckpoint]);
+  }, [selectedCheckpoint, api]);
 
-  const selectConnectedRoom = (connection: string) => {
+  const selectConnectedRoom = (connectedRoom: Room) => {
     /*
     TODO: need to check if room belongs to current checkpoint or not.
     If not, then we need to check across the whole chapter.
@@ -55,7 +55,7 @@ export function ChapterTree({filters}: Props) {
   const getActivePanel = () => {
     if (selectedRoom) {
       return (
-          <RoomDetails chapter={selectedChapter?.token} room={selectedRoom} filters={filters}
+          <RoomDetails room={selectedRoom} filters={filters}
                        onConnectedRoomSelected={selectConnectedRoom}></RoomDetails>
       );
     } else if (selectedCheckpoint) {

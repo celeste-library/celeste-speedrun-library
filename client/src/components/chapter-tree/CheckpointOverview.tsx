@@ -10,7 +10,7 @@ interface Props {
 export function CheckpointOverview({checkpoint, onClick}: Props) {
   return (
       <div className="checkpoint-box" onClick={() => onClick(checkpoint)}>
-        <img className="checkpoint-thumbnail" src={checkpoint.image}></img>
+        <img className="checkpoint-thumbnail" src={checkpoint.image} alt={checkpoint.name}></img>
         {checkpoint.name}
       </div>
   );

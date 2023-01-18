@@ -80,6 +80,7 @@ room_strats = Table('room_strats', Base.metadata,
 class Room(Base):
     __tablename__ = 'room'
     id = Column(Integer, primary_key=True)
+    token = Column(String, nullable=False, unique=True)
     chapter_id = Column(Integer, ForeignKey('chapter.id'), nullable=False)
     checkpoint_id = Column(Integer, ForeignKey('checkpoint.id'), nullable=False)
     code = Column(String, nullable=False)
