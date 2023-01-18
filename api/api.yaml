@@ -120,15 +120,9 @@ paths:
       summary: List all known strats for the specified room
       operationId: get_strats
       parameters:
-        - name: chapter
-          in: query
-          description: Token of the chapter the room is in
-          required: true
-          schema:
-            type: string
         - name: room
           in: query
-          description: Debug code of the room
+          description: Token of the room
           required: true
           schema:
             type: string
@@ -202,20 +196,23 @@ components:
       description: A single room
       type: object
       properties:
+        token:
+          type: string
+          description: Unique identifier for the room
         code:
           type: string
           description: Debug code of the room
         connected:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/Room'
           description: The rooms connected to this one
         image:
           type: string
           description: Image representing the room
       required:
+        - token
         - code
-        - connected
     Category:
       title: Speedrun Category
       description: A category of speedrun

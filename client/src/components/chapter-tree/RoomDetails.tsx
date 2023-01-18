@@ -4,19 +4,18 @@ import {Filters, Room} from '../../generated';
 import {Strats} from '../strats/Strats';
 
 interface Props {
-  chapter?: string;
   room?: Room;
-  filters?: Filters;
-  onConnectedRoomSelected: (roomCode: string) => void;
+  filters?: Filters
+  onConnectedRoomSelected: (room: Room) => void;
 }
 
-export function RoomDetails({chapter, room, filters, onConnectedRoomSelected}: Props) {
+export function RoomDetails({room, filters, onConnectedRoomSelected}: Props) {
   return (
-      room && <>
+      (room && <>
         <Card>
           <CardHeader title="Room Details"></CardHeader>
           <CardContent>
-            <img className="room-thumbnail" src={room.image}></img>
+            <img className="room-thumbnail" src={room.image} alt={room.code}></img>
           <div>
             <table>
               <tbody>
@@ -26,11 +25,11 @@ export function RoomDetails({chapter, room, filters, onConnectedRoomSelected}: P
               </tr>
               <tr>
                 <td>Connected Rooms:</td>
-                <td>{room.connected.map((connection, index) =>
-                    <Fragment key={connection}>
+                <td>{room.connected?.map((connection, index) =>
+                    <Fragment key={connection.token}>
                       {index > 0 && ', '}
                       <Link onClick={() => onConnectedRoomSelected(connection)}>
-                        {connection}
+                        {connection.code}
                       </Link>
                     </Fragment>)
                 }</td>
@@ -40,7 +39,7 @@ export function RoomDetails({chapter, room, filters, onConnectedRoomSelected}: P
           </div>
           </CardContent>
         </Card>
-        <Strats chapter={chapter} room={room.code} filters={filters}></Strats>
-      </> || <></>
+        <Strats room={room.token} filters={filters}></Strats>
+      </>) || <></>
   );
 }

@@ -1,29 +1,27 @@
 import {Typography} from '@mui/material';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {DefaultApi, DefaultApiInterface, Filters, Strat} from '../../generated';
 import {StratOverview} from '../strat-overview/StratOverview';
 
 interface Props {
-  chapter?: string;
   room?: string;
   filters?: Filters;
 }
 
-export function Strats({chapter, room, filters}: Props) {
-  const api: DefaultApiInterface = new DefaultApi();
+export function Strats({room, filters}: Props) {
+  const api: DefaultApiInterface = useMemo(() => new DefaultApi(), []);
   const [strats, setStrats] = useState<Strat[]>([]);
 
   useEffect(() => {
-    if (chapter && room) {
+    if (room) {
       api.getStrats({
-        chapter: chapter,
         room: room,
         category: filters?.category,
       }).then(setStrats);
     } else {
       setStrats([]);
     }
-  }, [chapter, room, filters]);
+  }, [room, filters, api]);
 
   return (
       <div>

@@ -1,5 +1,5 @@
 import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from '@mui/material';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Category, DefaultApi, DefaultApiInterface} from '../../generated';
 
 interface Props {
@@ -9,12 +9,12 @@ interface Props {
 
 
 export function CategoryFilter({selectedCategory, onCategorySelect}: Props) {
-  const api: DefaultApiInterface = new DefaultApi();
+  const api: DefaultApiInterface = useMemo(() => new DefaultApi(), []);
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     api.getCategories().then(setCategories);
-  }, []);
+  }, [api]);
 
   const handleChange = (event: SelectChangeEvent<typeof selectedCategory>) => {
     onCategorySelect(
