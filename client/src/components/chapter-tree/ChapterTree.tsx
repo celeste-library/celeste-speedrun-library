@@ -24,8 +24,6 @@ export function ChapterTree({filters}: Props) {
   }, [api]);
 
   useEffect(() => {
-    setSelectedRoom(undefined);
-    setSelectedCheckpoint(undefined);
     if (selectedChapter) {
       api.getCheckpoints({chapter: selectedChapter.token}).then(setCheckpoints);
     } else {
@@ -34,29 +32,41 @@ export function ChapterTree({filters}: Props) {
   }, [selectedChapter, api]);
 
   useEffect(() => {
-    setSelectedRoom(undefined);
+    const foundCheckpoint = checkpoints.find(checkpoint => checkpoint.token === selectedCheckpoint?.token);
+    setSelectedCheckpoint(foundCheckpoint);
+  }, [checkpoints]);
+
+  useEffect(() => {
     if (selectedCheckpoint) {
-      api.getRooms({checkpoint: selectedCheckpoint.token}).then((res) => {
-        setRooms(res);
-      });
+      api.getRooms({checkpoint: selectedCheckpoint.token}).then((res) => setRooms(res));
     } else {
       setRooms([]);
     }
   }, [selectedCheckpoint, api]);
 
-  const selectConnectedRoom = (connectedRoom: Room) => {
-    /*
-    TODO: need to check if room belongs to current checkpoint or not.
-    If not, then we need to check across the whole chapter.
-    Maybe instead have an effect on the token of the selected room that selects the chapter + checkpoint?
-     */
-  }
+  useEffect(() => {
+    const foundRoom = rooms.find(room => room.token === selectedRoom?.token);
+    setSelectedRoom(foundRoom);
+  }, [rooms]);
+
+  useEffect(() => {
+    if (selectedRoom) {
+      const foundRoom = rooms.find(room => room.token === selectedRoom?.token);
+      if (!foundRoom) {
+        api.getCheckpointByRoom({room: selectedRoom.token}).then(checkpoint => {
+          setSelectedCheckpoint(checkpoint);
+        });
+      } else {
+        setSelectedRoom(foundRoom);
+      }
+    }
+  }, [selectedRoom, api]);
 
   const getActivePanel = () => {
     if (selectedRoom) {
       return (
           <RoomDetails room={selectedRoom} filters={filters}
-                       onConnectedRoomSelected={selectConnectedRoom}></RoomDetails>
+                       onConnectedRoomSelected={setSelectedRoom}></RoomDetails>
       );
     } else if (selectedCheckpoint) {
       return (

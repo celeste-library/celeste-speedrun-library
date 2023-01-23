@@ -24,6 +24,11 @@ def get_rooms(checkpoint):
         return [api_resource.from_room(room, True) for room in repository.get_rooms(session, checkpoint)]
 
 
+def get_checkpoint_by_room(room):
+    with Session(engine) as session:
+        return api_resource.from_checkpoint(repository.get_checkpoint_by_room(session, room))
+
+
 def get_categories():
     with Session(engine) as session:
         return list(map(api_resource.from_level_category, repository.get_level_categories(session)))

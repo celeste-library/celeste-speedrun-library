@@ -19,6 +19,10 @@ def get_rooms(session: Session, checkpoint_token: str) -> list[Room]:
     return session.scalars(select(Room).join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token)))
 
 
+def get_checkpoint_by_room(session: Session, room_token: str) -> Checkpoint:
+    return session.scalar(select(Checkpoint).join(Checkpoint.rooms.and_(Room.token == room_token)))
+
+
 def get_level_categories(session: Session) -> list[LevelCategory]:
     return session.scalars(select(LevelCategory))
 
