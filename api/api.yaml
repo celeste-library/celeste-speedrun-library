@@ -102,6 +102,26 @@ paths:
                   $ref: '#/components/schemas/Room'
         '400':
           description: Invalid request
+  /checkpoint:
+    get:
+      summary: Get the checkpoint containing the specified room
+      operationId: get_checkpoint_by_room
+      parameters:
+        - name: room
+          in: query
+          description: Token of the room to get checkpoint for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checkpoint'
+        '400':
+          description: Invalid request
   /categories:
     get:
       summary: List speedrun categories
