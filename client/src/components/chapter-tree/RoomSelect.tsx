@@ -1,15 +1,22 @@
 import {Card, CardContent, CardHeader, Grid} from '@mui/material';
 import React from 'react';
-import {Room} from '../../generated';
+import {LoaderFunctionArgs, useLoaderData, useNavigate} from 'react-router-dom';
+import {DefaultApi, Room} from '../../generated';
 import {RoomOverview} from './RoomOverview';
 import './RoomSelect.css';
 
-interface Props {
-  rooms: Room[];
-  onRoomSelect: (room: Room) => void;
+export async function getRoomsLoader({params}: LoaderFunctionArgs): Promise<Room[]> {
+  const api = new DefaultApi();
+  if (params.checkpointToken) {
+    return api.getRooms({checkpoint: params.checkpointToken});
+  } else {
+    return Promise.resolve([]);
+  }
 }
 
-export function RoomSelect({rooms, onRoomSelect}: Props) {
+export function RoomSelect() {
+  const rooms = useLoaderData() as Awaited<ReturnType<typeof getRoomsLoader>>;
+  const navigate = useNavigate();
   return (
       <Card>
         <CardHeader title="Rooms"/>
@@ -17,7 +24,7 @@ export function RoomSelect({rooms, onRoomSelect}: Props) {
           <Grid container rowSpacing={2} columnSpacing={2}>
             {rooms.map(room =>
                 <Grid item key={room.code} xs={3}>
-                  <RoomOverview room={room} onClick={onRoomSelect}></RoomOverview>
+                  <RoomOverview room={room} onClick={() => navigate('../room/' + room.token)}></RoomOverview>
                 </Grid>,
             )}
           </Grid>

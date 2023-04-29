@@ -14,14 +14,29 @@ def get_chapters():
         return list(map(api_resource.from_chapter, repository.get_chapters(session)))
 
 
+def show_chapter(chapter):
+    with Session(engine) as session:
+        return api_resource.from_chapter(repository.get_chapter(session, chapter))
+
+
 def get_checkpoints(chapter):
     with Session(engine) as session:
         return list(map(api_resource.from_checkpoint, repository.get_checkpoints(session, chapter)))
 
 
+def show_checkpoint(checkpoint):
+    with Session(engine) as session:
+        return api_resource.from_checkpoint(repository.get_checkpoint(session, checkpoint))
+
+
 def get_rooms(checkpoint):
     with Session(engine) as session:
         return [api_resource.from_room(room, True) for room in repository.get_rooms(session, checkpoint)]
+
+
+def show_room(room):
+    with Session(engine) as session:
+        return api_resource.from_room(repository.get_room(session, room), True)
 
 
 def get_checkpoint_by_room(room):

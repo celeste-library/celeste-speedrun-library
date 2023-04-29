@@ -1,15 +1,20 @@
 import {Card, CardContent, CardHeader, Link} from '@mui/material';
 import React, {Fragment} from 'react';
-import {Filters, Room} from '../../generated';
+import {Link as RouterLink, LoaderFunctionArgs, useLoaderData} from 'react-router-dom';
+import {DefaultApi, Room} from '../../generated';
 import {Strats} from '../strats/Strats';
 
-interface Props {
-  room?: Room;
-  filters?: Filters
-  onConnectedRoomSelected: (room: Room) => void;
+export async function getRoomDetailsLoader({params}: LoaderFunctionArgs): Promise<Room | undefined> {
+  const api = new DefaultApi();
+  if (params.roomToken) {
+    return api.showRoom({room: params.roomToken});
+  } else {
+    return Promise.resolve(undefined);
+  }
 }
 
-export function RoomDetails({room, filters, onConnectedRoomSelected}: Props) {
+export function RoomDetails() {
+  const room = useLoaderData() as Awaited<ReturnType<typeof getRoomDetailsLoader>>;
   return (
       (room && <>
         <Card>
@@ -28,7 +33,7 @@ export function RoomDetails({room, filters, onConnectedRoomSelected}: Props) {
                 <td>{room.connected?.map((connection, index) =>
                     <Fragment key={connection.token}>
                       {index > 0 && ', '}
-                      <Link onClick={() => onConnectedRoomSelected(connection)}>
+                      <Link component={RouterLink} to={'../' + connection.token} relative="path">
                         {connection.code}
                       </Link>
                     </Fragment>)
@@ -39,7 +44,7 @@ export function RoomDetails({room, filters, onConnectedRoomSelected}: Props) {
           </div>
           </CardContent>
         </Card>
-        <Strats room={room.token} filters={filters}></Strats>
+        <Strats room={room.token}></Strats>
       </>) || <></>
   );
 }

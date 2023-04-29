@@ -58,6 +58,26 @@ paths:
                   $ref: '#/components/schemas/Chapter'
         '400':
           description: Invalid request
+  /chapters/{chapter}:
+    get:
+      summary: Show the specified chapter
+      operationId: show_chapter
+      parameters:
+        - name: chapter
+          in: path
+          description: Token of the chapter
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+        '400':
+          description: Invalid request
   /checkpoints:
     get:
       summary: List all checkpoints for the specified chapter
@@ -80,6 +100,26 @@ paths:
                   $ref: '#/components/schemas/Checkpoint'
         '400':
           description: Invalid request
+  /checkpoints/{checkpoint}:
+    get:
+      summary: Show the specified checkpoint
+      operationId: show_checkpoint
+      parameters:
+        - name: checkpoint
+          in: path
+          description: Token of the checkpoint
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checkpoint'
+        '400':
+          description: Invalid request
   /rooms:
     get:
       summary: List all rooms for the specified checkpoint
@@ -100,6 +140,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Room'
+        '400':
+          description: Invalid request
+  /rooms/{room}:
+    get:
+      summary: Show the specified room
+      operationId: show_room
+      parameters:
+        - name: room
+          in: path
+          description: Token of the room
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
         '400':
           description: Invalid request
   /checkpoint:
@@ -230,6 +290,8 @@ components:
         image:
           type: string
           description: Image representing the room
+        checkpoint:
+          $ref: '#/components/schemas/Checkpoint'
       required:
         - token
         - code

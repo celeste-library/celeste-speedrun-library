@@ -22,15 +22,16 @@ def from_checkpoint(checkpoint: tables.Checkpoint):
     }
 
 
-def from_room(room: tables.Room, with_connected=False):
-    connections = {
+def from_room(room: tables.Room, detailed=False):
+    details = {
         'connected': [from_room(connected) for connected in room.connected_rooms],
-    } if with_connected else {}
+        'checkpoint': from_checkpoint(room.checkpoint),
+    } if detailed else {}
     return {
         'token': room.token,
         'code': room.code,
         'image': str(PurePosixPath(WEB_METADATA_IMAGE_ROOT, 'room-previews', room.image)),
-        **connections,
+        **details,
     }
 
 

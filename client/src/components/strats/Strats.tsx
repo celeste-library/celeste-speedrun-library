@@ -1,27 +1,29 @@
 import {Typography} from '@mui/material';
 import React, {useEffect, useMemo, useState} from 'react';
-import {DefaultApi, DefaultApiInterface, Filters, Strat} from '../../generated';
+import {useSearchParams} from 'react-router-dom';
+import {DefaultApi, DefaultApiInterface, Strat} from '../../generated';
 import {StratOverview} from '../strat-overview/StratOverview';
 
 interface Props {
   room?: string;
-  filters?: Filters;
 }
 
-export function Strats({room, filters}: Props) {
+export function Strats({room}: Props) {
   const api: DefaultApiInterface = useMemo(() => new DefaultApi(), []);
   const [strats, setStrats] = useState<Strat[]>([]);
+  const [searchParams, _] = useSearchParams();
+  const category = searchParams.get('category') ?? undefined;
 
   useEffect(() => {
     if (room) {
       api.getStrats({
         room: room,
-        category: filters?.category,
+        category: category,
       }).then(setStrats);
     } else {
       setStrats([]);
     }
-  }, [room, filters, api]);
+  }, [room, api]);
 
   return (
       <div>

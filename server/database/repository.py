@@ -11,12 +11,24 @@ def get_chapters(session: Session) -> list[Chapter]:
     return session.scalars(select(Chapter))
 
 
+def get_chapter(session: Session, chapter_token: str) -> Chapter:
+    return session.scalar(select(Chapter).where(Chapter.token == chapter_token))
+
+
 def get_checkpoints(session: Session, chapter_token: str) -> list[Checkpoint]:
     return session.scalars(select(Checkpoint).join(Checkpoint.chapter.and_(Chapter.token == chapter_token)))
 
 
+def get_checkpoint(session: Session, checkpoint_token: str) -> Checkpoint:
+    return session.scalar(select(Checkpoint).where(Checkpoint.token == checkpoint_token))
+
+
 def get_rooms(session: Session, checkpoint_token: str) -> list[Room]:
     return session.scalars(select(Room).join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token)))
+
+
+def get_room(session: Session, room_token: str) -> Room:
+    return session.scalar(select(Room).where(Room.token == room_token))
 
 
 def get_checkpoint_by_room(session: Session, room_token: str) -> Checkpoint:

@@ -1,1 +1,2 @@
+# symlink to actual assets for dev, should be copied in separately on production
 /metadata
