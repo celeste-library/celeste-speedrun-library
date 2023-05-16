@@ -10,7 +10,7 @@ interface Props {
 export function RoomOverview({room, onClick}: Props) {
   return (
       <div className="room-box" onClick={() => onClick(room)}>
-        <img className="room-thumbnail" src={room.image}></img>
+        <img className="room-thumbnail" src={room.image} alt={room.code}></img>
         {room.code}
       </div>
   );

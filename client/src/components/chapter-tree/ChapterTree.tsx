@@ -1,87 +1,41 @@
 import {Breadcrumbs, Container, Link} from '@mui/material';
-import React, {useEffect, useState} from 'react';
-import {Category, Chapter, Checkpoint, DefaultApi, DefaultApiInterface, Filters, Room} from '../../generated';
-import {ChapterSelect} from './ChapterSelect';
-import {CheckpointSelect} from './CheckpointSelect';
-import {RoomDetails} from './RoomDetails';
-import {RoomSelect} from './RoomSelect';
+import {OrderedMap} from 'immutable';
+import React from 'react';
+import {Link as RouterLink, Outlet, useMatches} from 'react-router-dom';
+import {Filters} from '../../generated';
 
 interface Props {
   filters?: Filters;
 }
 
+interface RouteHandle {
+  crumbs: (loadedData: any) => [string, string][];
+  title: (loadedData: any) => string;
+}
+
 export function ChapterTree({filters}: Props) {
-  const api: DefaultApiInterface = new DefaultApi();
-  const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [selectedChapter, setSelectedChapter] = useState<Chapter>();
-  const [selectedCheckpoint, setSelectedCheckpoint] = useState<Checkpoint>();
-  const [selectedRoom, setSelectedRoom] = useState<Room>();
-
-  useEffect(() => {
-    api.getChapters().then(setChapters);
-  }, []);
-
-  useEffect(() => {
-    setSelectedRoom(undefined);
-    setSelectedCheckpoint(undefined);
-    if (selectedChapter) {
-      api.getCheckpoints({chapter: selectedChapter.token}).then(setCheckpoints);
-    } else {
-      setCheckpoints([]);
-    }
-  }, [selectedChapter]);
-
-  useEffect(() => {
-    setSelectedRoom(undefined);
-    if (selectedCheckpoint) {
-      api.getRooms({checkpoint: selectedCheckpoint.token}).then((res) => {
-        setRooms(res);
-      });
-    } else {
-      setRooms([]);
-    }
-  }, [selectedCheckpoint]);
-
-  const selectConnectedRoom = (connection: string) => {
-    /*
-    TODO: need to check if room belongs to current checkpoint or not.
-    If not, then we need to check across the whole chapter.
-    Maybe instead have an effect on the token of the selected room that selects the chapter + checkpoint?
-     */
-  }
-
-  const getActivePanel = () => {
-    if (selectedRoom) {
-      return (
-          <RoomDetails chapter={selectedChapter?.token} room={selectedRoom} filters={filters}
-                       onConnectedRoomSelected={selectConnectedRoom}></RoomDetails>
-      );
-    } else if (selectedCheckpoint) {
-      return (
-          <RoomSelect rooms={rooms} onRoomSelect={setSelectedRoom}></RoomSelect>
-      );
-    } else if (selectedChapter) {
-      return (
-          <CheckpointSelect checkpoints={checkpoints} onCheckpointSelect={setSelectedCheckpoint}></CheckpointSelect>
-      );
-    } else {
-      return (
-          <ChapterSelect chapters={chapters} onChapterSelect={setSelectedChapter}></ChapterSelect>
-      );
-    }
-  };
+  const matches = useMatches() as {pathname: string, handle: RouteHandle, data: any}[];
+  const crumbs = matches
+      .filter(match => match.handle)
+      .reduce((breadcrumbs: OrderedMap<string, string>, match) => {
+        if (match.handle.crumbs) {
+          const temp = OrderedMap(match.handle.crumbs(match.data)).mapKeys(key => match.pathname + key);
+          return breadcrumbs.concat(temp);
+        } else if (match.handle.title) {
+          return breadcrumbs.set(match.pathname, match.handle.title(match.data));
+        } else {
+          return breadcrumbs;
+        }
+      }, OrderedMap<string, string>());
 
   return (
       <Container>
         <Breadcrumbs aria-label="breadcrumb">
-          <Link onClick={() => setSelectedChapter(undefined)}>Home</Link>
-          {selectedChapter && <Link onClick={() => setSelectedCheckpoint(undefined)}>{selectedChapter.name}</Link>}
-          {selectedCheckpoint && <Link onClick={() => setSelectedRoom(undefined)}>{selectedCheckpoint.name}</Link>}
-          {selectedRoom && <Link>{selectedRoom.code}</Link>}
+          {crumbs.toArray().map(([path, label]: [string, string]) => (
+              <Link component={RouterLink} to={path} key={path}>{label}</Link>
+          ))}
         </Breadcrumbs>
-        {getActivePanel()}
+        <Outlet />
       </Container>
   );
 }

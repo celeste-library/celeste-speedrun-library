@@ -207,3 +207,37 @@ sudo systemctl enable --now gunicorn.service
 
 See [here](https://flask.palletsprojects.com/en/2.2.x/deploying/gunicorn/#running)
 and [here](https://docs.gunicorn.org/en/stable/deploy.html#systemd) for more details.
+
+# Deploying new changes
+1. Grab the latest changes:
+```
+cd ~/celeste-library/celeste-speedrun-library/
+git pull
+```
+2. Run code generation (if any API changes):
+```
+cd ~/celeste-library/celeste-speedrun-library/api/
+npm run generate
+cd ..
+```
+3. Reload the database from files:
+```
+cd ~/celeste-library/celeste-speedrun-library/server/
+. venv/bin/activate
+python util.py
+deactivate
+```
+4. Restart server:
+```
+sudo systemctl restart gunicorn.service
+```
+5. Build client:
+```
+cd ~/celeste-library/celeste-speedrun-library/client
+npm run build
+sudo cp -r ~/celeste-library/celeste-speedrun-library/client/build/* /var/www/html/
+```
+For local client build:
+```
+scp /home/dev/celeste-library/celeste-speedrun-library/client/build
+```

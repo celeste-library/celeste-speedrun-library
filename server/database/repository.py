@@ -11,37 +11,36 @@ def get_chapters(session: Session) -> list[Chapter]:
     return session.scalars(select(Chapter))
 
 
+def get_chapter(session: Session, chapter_token: str) -> Chapter:
+    return session.scalar(select(Chapter).where(Chapter.token == chapter_token))
+
+
 def get_checkpoints(session: Session, chapter_token: str) -> list[Checkpoint]:
     return session.scalars(select(Checkpoint).join(Checkpoint.chapter.and_(Chapter.token == chapter_token)))
 
 
-def get_rooms(session: Session, checkpoint_token: str):
+def get_checkpoint(session: Session, checkpoint_token: str) -> Checkpoint:
+    return session.scalar(select(Checkpoint).where(Checkpoint.token == checkpoint_token))
+
+
+def get_rooms(session: Session, checkpoint_token: str) -> list[Room]:
     return session.scalars(select(Room).join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token)))
 
 
-# def get_room_details(chapter_token: str, room: str) -> dict:
-#     with Session(engine) as session:
-#         room = session.scalar(select(Room)
-#                               .join(Room.checkpoint)
-#                               .join(Checkpoint.chapter.and_(Chapter.token == chapter_token))
-#                               .where(Room.code == room))
-#         print(room.connected_rooms)
-#         return {
-#             'code': room.code,
-#             'image': room.image,
-#             'connected': room.connected_rooms,
-#         }
+def get_room(session: Session, room_token: str) -> Room:
+    return session.scalar(select(Room).where(Room.token == room_token))
+
+
+def get_checkpoint_by_room(session: Session, room_token: str) -> Checkpoint:
+    return session.scalar(select(Checkpoint).join(Checkpoint.rooms.and_(Room.token == room_token)))
 
 
 def get_level_categories(session: Session) -> list[LevelCategory]:
     return session.scalars(select(LevelCategory))
 
 
-def get_strats_for_room(session: Session, chapter_token: str, room: str, category: str) -> list[Strat]:
-    query = (select(Strat)
-             .join(Strat.rooms)
-             .join(Room.checkpoint.and_(Room.code == room))
-             .join(Checkpoint.chapter.and_(Chapter.token == chapter_token)))
+def get_strats_for_room(session: Session, room_token: str, category: str) -> list[Strat]:
+    query = (select(Strat).join(Strat.rooms.and_(Room.token == room_token)))
     if category is not None:
         query = query.join(Strat.categories.and_(LevelCategory.token == category))
     return session.scalars(query)
