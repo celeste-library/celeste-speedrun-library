@@ -156,6 +156,13 @@ find the **SECOND** block that looks like:
 ```
 (The first one is for plain HTTP which we don't care about.)
 
+Modify it so that it says:
+```
+        location / {
+                try_files $uri /index.html;
+        }
+```
+
 Below that, add a new block:
 ```
     # Redirect API calls
@@ -239,5 +246,5 @@ sudo cp -r ~/celeste-library/celeste-speedrun-library/client/build/* /var/www/ht
 ```
 For local client build:
 ```
-scp /home/dev/celeste-library/celeste-speedrun-library/client/build
+scp -r build servername:/home/dev/celeste-library/celeste-speedrun-library/client/build
 ```
