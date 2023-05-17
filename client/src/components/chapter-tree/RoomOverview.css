@@ -7,3 +7,7 @@
 .room-thumbnail {
   max-width: 100%;
 }
+
+.room-full-image {
+  zoom: 150%;
+}

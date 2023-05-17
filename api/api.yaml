@@ -287,9 +287,12 @@ components:
           items:
             $ref: '#/components/schemas/Room'
           description: The rooms connected to this one
-        image:
+        image_preview:
           type: string
-          description: Image representing the room
+          description: Image of a portion of the room that fits on a single screen
+        image_full:
+          type: string
+          description: Image of the entire room
         checkpoint:
           $ref: '#/components/schemas/Checkpoint'
       required:

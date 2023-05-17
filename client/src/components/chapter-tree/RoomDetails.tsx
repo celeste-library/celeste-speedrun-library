@@ -20,7 +20,7 @@ export function RoomDetails() {
         <Card>
           <CardHeader title="Room Details"></CardHeader>
           <CardContent>
-            <img className="room-thumbnail" src={room.image} alt={room.code}></img>
+            <img className="room-full-image" src={room.imageFull} alt={room.code}></img>
           <div>
             <table>
               <tbody>

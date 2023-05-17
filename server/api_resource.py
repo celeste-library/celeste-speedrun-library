@@ -30,7 +30,8 @@ def from_room(room: tables.Room, detailed=False):
     return {
         'token': room.token,
         'code': room.code,
-        'image': str(PurePosixPath(WEB_METADATA_IMAGE_ROOT, 'room-previews', room.image)),
+        'image_preview': str(PurePosixPath(WEB_METADATA_IMAGE_ROOT, 'room-previews', room.image)),
+        'image_full': str(PurePosixPath(WEB_METADATA_IMAGE_ROOT, 'rooms', room.image)),
         **details,
     }
 
