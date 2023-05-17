@@ -4,7 +4,7 @@ import {Category, DefaultApi, DefaultApiInterface} from '../../generated';
 
 interface Props {
   selectedCategory?: string;
-  onCategorySelect: (category: string) => void;
+  onCategorySelect: (category?: string) => void;
 }
 
 
@@ -28,6 +28,7 @@ export function CategoryFilter({selectedCategory, onCategorySelect}: Props) {
       <FormControl sx={{m: 1, width: 250}} size="small">
         <InputLabel>Category</InputLabel>
         <Select label="Category" value={selectedCategory ?? ''} onChange={handleChange}>
+          <MenuItem value={undefined}></MenuItem>
           {categories.map(category => (
               <MenuItem key={category.token} value={category.token}>{category.name}</MenuItem>
           ))}

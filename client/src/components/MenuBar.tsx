@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function MenuBar({filters, onFiltersSet}: Props) {
-  const setCategory = (category: string) => {
+  const setCategory = (category?: string) => {
     onFiltersSet({
       ...filters,
       category: category,
