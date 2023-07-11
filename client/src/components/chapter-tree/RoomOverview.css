@@ -9,5 +9,8 @@
 }
 
 .room-full-image {
-  zoom: 150%;
+  box-sizing: border-box;
+  max-height: 40vh;
+  max-width: calc(50vw - 8px);
+  zoom: 2.0;
 }

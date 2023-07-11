@@ -1,5 +1,5 @@
-import {Popover} from '@mui/material';
-import React from 'react';
+import {Fade, Popper} from '@mui/material';
+import React, {useRef} from 'react';
 import {Room} from '../../generated';
 import './RoomOverview.css';
 
@@ -9,10 +9,11 @@ interface Props {
 }
 
 export function RoomOverview({room, onClick}: Props) {
+  const containerDivRef = useRef(null);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
-  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handlePopoverOpen = () => {
+    setAnchorEl(containerDivRef.current);
   };
 
   const handlePopoverClose = () => {
@@ -21,30 +22,29 @@ export function RoomOverview({room, onClick}: Props) {
 
   const open = Boolean(anchorEl);
   return (
-      <div className="room-box" onClick={() => onClick(room)}>
+      <div className="room-box" ref={containerDivRef} onClick={() => onClick(room)}>
         <img className="room-thumbnail" src={room.imagePreview} alt={room.code}
              onMouseEnter={handlePopoverOpen}
-             onMouseLeave={handlePopoverClose}></img>
-        <Popover
-            id="mouse-over-popover"
-            sx={{
-              pointerEvents: 'none',
-            }}
-            open={open}
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            transformOrigin={{
-              vertical: -24,
-              horizontal: 'center',
-            }}
-            onClose={handlePopoverClose}
-            keepMounted
-            disableRestoreFocus>
-          <img className="room-full-image" src={room.imageFull}></img>
-        </Popover>
+             onFocus={handlePopoverOpen}
+             onMouseLeave={handlePopoverClose}
+             onBlur={handlePopoverClose}></img>
+        <Popper open={open} anchorEl={anchorEl} placement="bottom" transition keepMounted modifiers={[
+          {
+            name: 'preventOverflow',
+            enabled: true,
+            options: {
+              altAxis: true,
+              padding: 8,
+            },
+          },
+        ]}
+        >
+          {({TransitionProps}) => (
+              <Fade {...TransitionProps} timeout={200}>
+                <img className="room-full-image" src={room.imageFull}></img>
+              </Fade>
+          )}
+        </Popper>
         {room.code}
       </div>
   );

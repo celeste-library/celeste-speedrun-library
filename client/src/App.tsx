@@ -12,6 +12,8 @@ import {CheckpointSelect, getCheckpointsLoader, showCheckpointLoader} from './co
 import {getRoomDetailsLoader, RoomDetails} from './components/chapter-tree/RoomDetails';
 import {getRoomsLoader, RoomSelect} from './components/chapter-tree/RoomSelect';
 import {Root} from './components/Root';
+import {DiscordVideo, getAttachmentId} from './components/video-embed/DiscordVideo';
+import {VideoInput} from './components/video-embed/VideoInput';
 import {Chapter, Checkpoint, Room} from './generated';
 
 const darkTheme = createTheme({
@@ -29,7 +31,16 @@ const darkTheme = createTheme({
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: 'video',
+    element: <VideoInput/>,
+  },
+  {
+    path: 'video/:parentDir/:childDir/:filename',
+    element: <DiscordVideo/>,
+    loader: getAttachmentId,
+  },
+  {
+    path: '/',
     element: <Root></Root>,
     // errorElement: <div>URL not found</div>,
     handle: {
