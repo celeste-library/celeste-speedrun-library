@@ -23,7 +23,7 @@ export function Strats({room}: Props) {
     } else {
       setStrats([]);
     }
-  }, [room, api]);
+  }, [api, room, category]);
 
   return (
       <div>
