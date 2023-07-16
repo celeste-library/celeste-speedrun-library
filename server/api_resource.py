@@ -48,6 +48,7 @@ def from_strat(strat: tables.Strat):
         'name': strat.nickname,
         'description': strat.description,
         'notes': strat.notes,
-        'start': ' '.join((strat.start_room.code, strat.start_detail)),
-        'end': ' '.join((strat.end_room.code, strat.end_detail)),
+        'media': strat.media,
+        'start': ' '.join((strat.start_room.code, strat.start_detail)) if strat.start_room else None,
+        'end': ' '.join((strat.end_room.code, strat.end_detail)) if strat.end_room else None,
     }

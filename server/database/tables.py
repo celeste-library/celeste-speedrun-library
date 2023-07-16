@@ -1,6 +1,6 @@
 from pathlib import PurePosixPath
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Table, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Integer, JSON, String, Table, UniqueConstraint
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -103,12 +103,13 @@ class Strat(Base):
     __tablename__ = 'strat'
     id = Column(Integer, primary_key=True)
     nickname = Column(String)
-    start_room_id = Column(Integer, ForeignKey('room.id'), nullable=False)
+    start_room_id = Column(Integer, ForeignKey('room.id'))
     start_detail = Column(String)
-    end_room_id = Column(Integer, ForeignKey('room.id'), nullable=False)
+    end_room_id = Column(Integer, ForeignKey('room.id'))
     end_detail = Column(String)
     description = Column(String)
     notes = Column(String)
+    media = Column(JSON)
     start_room = relationship('Room', foreign_keys=start_room_id)
     end_room = relationship('Room', foreign_keys=end_room_id)
     rooms = relationship('Room', secondary=room_strats, back_populates='strats')

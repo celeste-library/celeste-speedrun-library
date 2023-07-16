@@ -11,7 +11,7 @@ from .tables import Chapter, Difficulty, FullGameCategory, LevelCategory, Room, 
 
 
 def load_metadata(session: Session, file: PathLike):
-    with open(file, mode='r') as f:
+    with open(file, encoding='UTF-8', mode='r') as f:
         metadata = json.load(f)
     for token, name in metadata['level_categories'].items():
         session.add(LevelCategory(token=token, name=name))
@@ -22,7 +22,7 @@ def load_metadata(session: Session, file: PathLike):
 
 
 def load_chapter_tree(session: Session, file: PathLike):
-    with open(file, mode='r') as f:
+    with open(file, encoding='UTF-8', mode='r') as f:
         chapter_tree = json.load(f)
 
     for chapter_data in chapter_tree['chapters']:
@@ -54,8 +54,8 @@ def get_rooms_in_range(start_room: Room, start_detail: str, end_room: Room, end_
     return [start_room]
 
 
-def load_chapter_strats(session: Session, file: PathLike, chapter: Chapter):
-    with open(file) as f:
+def load_strats(session: Session, file: PathLike):
+    with open(file, encoding='UTF-8', mode='r') as f:
         strat_list = json.load(f)
 
     category_map = {category.token: category for category in session.scalars(select(LevelCategory))}
@@ -66,18 +66,21 @@ def load_chapter_strats(session: Session, file: PathLike, chapter: Chapter):
             if len(split) == 1:
                 return split[0], '*'
             return tuple(split)
-        start_room_code, start_detail = split_safe(strat_data['start'])
-        end_room_code, end_detail = split_safe(strat_data['end'])
         categories = [category_map[category] for category in strat_data['categories']]
-        select_chapter_rooms = select(Room).join(Room.chapter.and_(Chapter.id == chapter.id))
-        start_room = session.scalar(select_chapter_rooms.where(Room.code == start_room_code))
-        end_room = session.scalar(select_chapter_rooms.where(Room.code == end_room_code))
-        strat = Strat(nickname=strat_data['name'],
+        start_room, start_detail, end_room, end_detail = None, None, None, None
+        if 'start' in strat_data and 'end' in strat_data:
+            start_room_token, start_detail = split_safe(strat_data['start'])
+            end_room_token, end_detail = split_safe(strat_data['end'])
+            start_room = session.scalar(select(Room).where(Room.token == start_room_token))
+            end_room = session.scalar(select(Room).where(Room.token == end_room_token))
+        rooms = list(session.scalars(select(Room).where(Room.token.in_(strat_data['rooms']))))
+        strat = Strat(nickname=strat_data.get('name'),
                       description=strat_data['description'],
                       notes=strat_data.get('notes'),
                       categories=categories,
+                      rooms=rooms,
+                      media=strat_data.get('media', []),
                       start_room=start_room, start_detail=start_detail, end_room=end_room, end_detail=end_detail)
-        strat.rooms = get_rooms_in_range(start_room, start_detail, end_room, end_detail)
         session.add(strat)
 
 
@@ -88,4 +91,7 @@ def load_all_data(session: Session, metadata_root: Path, speedrun_data_root: Pat
     for chapter in chapters:
         strats_file = speedrun_data_root.joinpath(chapter.relative_path, 'strats.json')
         if strats_file.is_file():
-            load_chapter_strats(session, strats_file, chapter)
+            load_strats(session, strats_file)
+    strats_file = speedrun_data_root.joinpath('scraped-strats.json')
+    if strats_file.is_file():
+        load_strats(session, strats_file)

@@ -327,6 +327,10 @@ components:
           type: string
         end:
           type: string
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
     Filters:
       title: Filters
       description: Filters for narrowing down selections
@@ -334,3 +338,14 @@ components:
       properties:
         category:
           type: string
+    Media:
+      title: Media
+      description: Image or video file
+      type: object
+      properties:
+        url:
+          type: string
+        framerate:
+          type: number
+      required:
+        - url
