@@ -47,7 +47,7 @@ export function RoomOverview({room, onClick}: Props) {
             disableScrollLock
             disableRestoreFocus>
           <div className="popover-image-wrapper">
-            <img className="room-full-image" src={room.imageFull}></img>
+            <img className="room-full-image" src={room.imageFull} alt={room.code}></img>
           </div>
         </Popover>
         {room.code}
