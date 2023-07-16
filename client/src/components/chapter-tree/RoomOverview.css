@@ -8,6 +8,15 @@
   max-width: 100%;
 }
 
+.popover-image-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
 .room-full-image {
-  zoom: 150%;
+  box-sizing: border-box;
+  max-height: 40vh;
+  max-width: calc(50vw - 24px);
+  zoom: 2.0;
+  image-rendering: pixelated;
 }

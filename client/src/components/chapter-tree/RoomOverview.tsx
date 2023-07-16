@@ -40,10 +40,15 @@ export function RoomOverview({room, onClick}: Props) {
               vertical: -24,
               horizontal: 'center',
             }}
+            transitionDuration={150}
+            marginThreshold={24}
             onClose={handlePopoverClose}
             keepMounted
+            disableScrollLock
             disableRestoreFocus>
-          <img className="room-full-image" src={room.imageFull}></img>
+          <div className="popover-image-wrapper">
+            <img className="room-full-image" src={room.imageFull}></img>
+          </div>
         </Popover>
         {room.code}
       </div>
