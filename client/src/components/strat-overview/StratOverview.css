@@ -3,12 +3,14 @@
   flex-direction: row;
 }
 
-.preview-wrapper {
+.strat-info {
+  flex-basis:500px;
+  flex-grow: 2;
+}
+
+.strat-media {
   margin-right: 10px;
-  flex-direction: column;
-  align-content: center;
-  justify-content: center;
-  text-align: center;
-  display: flex;
-  min-width: 200px;
+  min-width: 320px;
+  flex-basis:500px;
+  flex-grow: 4;
 }
