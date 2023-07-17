@@ -11,7 +11,7 @@ interface Props {
 export function Strats({room}: Props) {
   const api: DefaultApiInterface = useMemo(() => new DefaultApi(), []);
   const [strats, setStrats] = useState<Strat[]>([]);
-  const [searchParams, _] = useSearchParams();
+  const [searchParams, ] = useSearchParams();
   const category = searchParams.get('category') ?? undefined;
 
   useEffect(() => {
