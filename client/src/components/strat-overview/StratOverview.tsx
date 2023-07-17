@@ -41,9 +41,14 @@ export function StratOverview({strat}: Props) {
               </table>
             </div>
             <div className="strat-media">
-              {strat.media && strat.media.map((media) => (
-                <StratVideo url={media.url} framerate={media.framerate}/>
-              ))}
+              {strat.media?.map((media) => {
+                if (media.mimetype.startsWith('video')) {
+                  return <StratVideo url={media.url} framerate={media.framerate}/>;
+                } else if (media.mimetype.startsWith('image')) {
+                  return <img src={media.url} alt=""/>;
+                }
+                return null;
+              })}
             </div>
           </div>
           <div>

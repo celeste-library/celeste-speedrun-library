@@ -4,13 +4,12 @@
 }
 
 .strat-info {
-  flex-basis:500px;
+  flex-basis: 500px;
   flex-grow: 2;
 }
 
 .strat-media {
-  margin-right: 10px;
   min-width: 320px;
-  flex-basis:500px;
+  flex-basis: 500px;
   flex-grow: 4;
 }
