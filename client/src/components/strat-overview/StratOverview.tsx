@@ -2,6 +2,7 @@ import {Card, CardContent} from '@mui/material';
 import React from 'react';
 import {Strat} from '../../generated';
 import {StratDetail} from '../strat-detail/StratDetail';
+import {StratVideo} from '../video-embed/StratVideo';
 import './StratOverview.css';
 
 interface Props {
@@ -13,10 +14,7 @@ export function StratOverview({strat}: Props) {
       <Card sx={{marginY: 1}}>
         <CardContent>
           <div className="strat-row">
-            <div className="preview-wrapper">
-              Gif goes here
-            </div>
-            <div>
+            <div className="strat-info">
               <table>
                 <tbody>
                 <tr>
@@ -41,6 +39,11 @@ export function StratOverview({strat}: Props) {
                 </tr>
                 </tbody>
               </table>
+            </div>
+            <div className="strat-media">
+              {strat.media && strat.media.map((media) => (
+                <StratVideo url={media.url} framerate={media.framerate}/>
+              ))}
             </div>
           </div>
           <div>
