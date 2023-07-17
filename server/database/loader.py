@@ -1,4 +1,5 @@
 import json
+import mimetypes
 from os import PathLike
 from pathlib import Path
 from typing import List
@@ -74,12 +75,16 @@ def load_strats(session: Session, file: PathLike):
             start_room = session.scalar(select(Room).where(Room.token == start_room_token))
             end_room = session.scalar(select(Room).where(Room.token == end_room_token))
         rooms = list(session.scalars(select(Room).where(Room.token.in_(strat_data['rooms']))))
+        media = [{
+            **item,
+            'mimetype': mimetypes.guess_type(item['url'])[0],
+        } for item in strat_data.get('media', [])]
         strat = Strat(nickname=strat_data.get('name'),
                       description=strat_data['description'],
                       notes=strat_data.get('notes'),
                       categories=categories,
                       rooms=rooms,
-                      media=strat_data.get('media', []),
+                      media=media,
                       start_room=start_room, start_detail=start_detail, end_room=end_room, end_detail=end_detail)
         session.add(strat)
 

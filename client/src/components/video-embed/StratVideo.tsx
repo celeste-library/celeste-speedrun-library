@@ -19,7 +19,7 @@ export function StratVideo({url, framerate}: StratVideoProps) {
   };
 
   return (
-    <div className="strat-video">
+    <div>
       <VideoJS options={{...options}}/>
     </div>
   );

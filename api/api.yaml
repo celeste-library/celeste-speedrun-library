@@ -345,7 +345,10 @@ components:
       properties:
         url:
           type: string
+        mimetype:
+          type: string
         framerate:
           type: number
       required:
         - url
+        - mimetype
