@@ -1,50 +1,55 @@
 from pathlib import PurePosixPath
+from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, JSON, String, Table, UniqueConstraint
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    type_annotation_map = {
+        dict: JSON
+    }
 
 
 class LevelCategory(Base):
     __tablename__ = 'level_category'
-    id = Column(Integer, primary_key=True)
-    token = Column(String, nullable=False, unique=True)
-    name = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
+    name: Mapped[str]
 
 
 class FullGameCategory(Base):
     __tablename__ = 'fullgame_category'
-    id = Column(Integer, primary_key=True)
-    token = Column(String, nullable=False, unique=True)
-    name = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
+    name: Mapped[str]
     # chapter_parent: LevelCategory = relationship('LevelCategory')
 
 
 class Difficulty(Base):
     __tablename__ = 'difficulty'
-    id = Column(Integer, primary_key=True)
-    label = Column(String)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    label: Mapped[Optional[str]]
 
 
 class ChapterParent(Base):
     __tablename__ = 'chapter_parent'
-    id = Column(Integer, primary_key=True)
-    token = Column(String, nullable=False, unique=True)
-    number = Column(Integer)
-    name = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
+    number: Mapped[Optional[int]]
+    name: Mapped[str]
 
 
 class Chapter(Base):
     __tablename__ = 'chapter'
-    id = Column(Integer, primary_key=True)
-    token = Column(String, nullable=False, unique=True)
-    parent_id = Column(Integer, ForeignKey('chapter_parent.id'), nullable=False)
-    side = Column(String(1))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
+    parent_id: Mapped[int] = mapped_column(ForeignKey('chapter_parent.id'))
+    side: Mapped[Optional[str]] = mapped_column(String(1))
     UniqueConstraint(parent_id, side)
-    relative_path = Column(String, nullable=False, unique=True)
-    chapter_parent: ChapterParent = relationship('ChapterParent')
-    checkpoints: list['Checkpoint'] = relationship('Checkpoint', back_populates='chapter')
+    relative_path: Mapped[str] = mapped_column(unique=True)
+    chapter_parent: Mapped[ChapterParent] = relationship()
+    checkpoints: Mapped[list['Checkpoint']] = relationship(back_populates='chapter')
 
     @property
     def full_name(self) -> str:
@@ -55,13 +60,13 @@ class Chapter(Base):
 
 class Checkpoint(Base):
     __tablename__ = 'checkpoint'
-    id = Column(Integer, primary_key=True)
-    token = Column(String, nullable=False, unique=True)
-    chapter_id = Column(Integer, ForeignKey('chapter.id'), nullable=False)
-    number = Column(Integer, nullable=False)
-    name = Column(String, nullable=False)
-    chapter = relationship('Chapter', back_populates='checkpoints')
-    rooms = relationship('Room', back_populates='checkpoint')
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
+    chapter_id: Mapped[int] = mapped_column(ForeignKey('chapter.id'))
+    number: Mapped[int]
+    name: Mapped[str]
+    chapter: Mapped[Chapter] = relationship(back_populates='checkpoints')
+    rooms: Mapped[list['Room']] = relationship(back_populates='checkpoint')
 
     @property
     def image(self) -> PurePosixPath:
@@ -79,20 +84,19 @@ room_strats = Table('room_strats', Base.metadata,
 
 class Room(Base):
     __tablename__ = 'room'
-    id = Column(Integer, primary_key=True)
-    token = Column(String, nullable=False, unique=True)
-    chapter_id = Column(Integer, ForeignKey('chapter.id'), nullable=False)
-    checkpoint_id = Column(Integer, ForeignKey('checkpoint.id'), nullable=False)
-    code = Column(String, nullable=False)
-    nickname = Column(String)
-    checkpoint = relationship('Checkpoint', back_populates='rooms')
-    chapter = relationship('Chapter')
-    connected_rooms = relationship('Room',
-                                   secondary='room_connections',
-                                   primaryjoin=id == room_connections.c.room_a_id,
-                                   secondaryjoin=id == room_connections.c.room_b_id)
-    strats = relationship('Strat', secondary='room_strats', back_populates='rooms')
-    UniqueConstraint(code, chapter_id)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
+    chapter_id: Mapped[int] = mapped_column(ForeignKey('chapter.id'))
+    checkpoint_id: Mapped[int] = mapped_column(ForeignKey('checkpoint.id'))
+    code: Mapped[str]
+    nickname: Mapped[Optional[str]]
+    checkpoint: Mapped[Checkpoint] = relationship(back_populates='rooms')
+    chapter: Mapped[Chapter] = relationship()
+    connected_rooms: Mapped[list['Room']] = relationship(secondary='room_connections',
+                                                         primaryjoin=id == room_connections.c.room_a_id,
+                                                         secondaryjoin=id == room_connections.c.room_b_id)
+    strats: Mapped[list['Strat']] = relationship(secondary='room_strats', back_populates='rooms')
+    UniqueConstraint('code', chapter_id)
 
     @property
     def image(self) -> PurePosixPath:
@@ -101,19 +105,19 @@ class Room(Base):
 
 class Strat(Base):
     __tablename__ = 'strat'
-    id = Column(Integer, primary_key=True)
-    nickname = Column(String)
-    start_room_id = Column(Integer, ForeignKey('room.id'))
-    start_detail = Column(String)
-    end_room_id = Column(Integer, ForeignKey('room.id'))
-    end_detail = Column(String)
-    description = Column(String)
-    notes = Column(String)
-    media = Column(JSON)
-    start_room = relationship('Room', foreign_keys=start_room_id)
-    end_room = relationship('Room', foreign_keys=end_room_id)
-    rooms = relationship('Room', secondary=room_strats, back_populates='strats')
-    categories = relationship('LevelCategory', secondary='strat_categories')
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nickname: Mapped[Optional[str]]
+    start_room_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('room.id'))
+    start_detail: Mapped[Optional[str]]
+    end_room_id: Mapped[Optional[int]] = mapped_column(ForeignKey('room.id'))
+    end_detail: Mapped[Optional[str]]
+    description: Mapped[Optional[str]]
+    notes: Mapped[Optional[str]]
+    media: Mapped[Optional[dict]]
+    start_room: Mapped[Optional[Room]] = relationship(foreign_keys=start_room_id)
+    end_room: Mapped[Optional[Room]] = relationship(foreign_keys=end_room_id)
+    rooms: Mapped[list[Room]] = relationship(secondary=room_strats, back_populates='strats')
+    categories: Mapped[list[LevelCategory]] = relationship('LevelCategory', secondary='strat_categories')
 
 
 strat_categories = Table('strat_categories', Base.metadata,
