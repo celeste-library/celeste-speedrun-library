@@ -2,13 +2,12 @@ import json
 import mimetypes
 from os import PathLike
 from pathlib import Path
-from typing import List
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import factory
-from .tables import Chapter, Difficulty, FullGameCategory, LevelCategory, Room, Strat
+from .tables import Chapter, Difficulty, FullGameCategory, LevelCategory, LevelRoute, Room, Strat
 
 
 def load_metadata(session: Session, file: PathLike):
@@ -49,10 +48,21 @@ def load_chapter_tree(session: Session, file: PathLike):
                 room.connected_rooms = [chapter_rooms_links[room_code][0] for room_code in links]
 
 
-def get_rooms_in_range(start_room: Room, start_detail: str, end_room: Room, end_detail: str) -> List[Room]:
-    if start_room == end_room:
-        return [start_room]
-    return [start_room]
+def load_routes(session: Session, file: PathLike):
+    with open(file, encoding='UTF-8', mode='r') as f:
+        route_data = json.load(f)
+
+    level_routes = route_data['level_routes']
+    for chapter_parent, sides_data in level_routes.items():
+        for side, chapter_data in sides_data.items():
+            chapter_token = f'{chapter_parent}-{side}'
+            chapter = session.scalar(select(Chapter).where(Chapter.token == chapter_token))
+            for category_token, routes in chapter_data.items():
+                category = session.scalar(select(LevelCategory).where(LevelCategory.token == category_token))
+                for route in routes:
+                    route_cleaned = [f'{chapter_token}-{room.split()[0]}' for room in route]
+                    rooms = list(session.scalars(select(Room).where(Room.token.in_(route_cleaned))))
+                    session.add(LevelRoute(chapter=chapter, category=category, rooms=rooms))
 
 
 def load_strats(session: Session, file: PathLike):
@@ -92,6 +102,7 @@ def load_strats(session: Session, file: PathLike):
 def load_all_data(session: Session, metadata_root: Path, speedrun_data_root: Path):
     load_metadata(session, speedrun_data_root.joinpath('metadata.json'))
     load_chapter_tree(session, metadata_root.joinpath('celeste.json'))
+    load_routes(session, speedrun_data_root.joinpath('routes.json'))
     chapters = session.scalars(select(Chapter))
     for chapter in chapters:
         strats_file = speedrun_data_root.joinpath(chapter.relative_path, 'strats.json')

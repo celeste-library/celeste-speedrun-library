@@ -103,6 +103,21 @@ class Room(Base):
         return PurePosixPath(self.chapter.relative_path, self.code).with_suffix('.png')
 
 
+class LevelRoute(Base):
+    __tablename__ = 'level_route'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter_id: Mapped[int] = mapped_column(ForeignKey('chapter.id'))
+    category_id: Mapped[int] = mapped_column(ForeignKey('level_category.id'))
+    chapter: Mapped[Chapter] = relationship('Chapter')
+    category: Mapped[LevelCategory] = relationship('LevelCategory')
+    rooms: Mapped[list[Room]] = relationship('Room', secondary='route_rooms')
+
+
+route_rooms = Table('route_rooms', Base.metadata,
+                    Column('level_route_id', Integer, ForeignKey('level_route.id'), primary_key=True),
+                    Column('room_id', Integer, ForeignKey('room.id'), primary_key=True))
+
+
 class Strat(Base):
     __tablename__ = 'strat'
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -123,10 +138,3 @@ class Strat(Base):
 strat_categories = Table('strat_categories', Base.metadata,
                          Column('strat_id', Integer, ForeignKey('strat.id'), primary_key=True),
                          Column('level_category_id', Integer, ForeignKey('level_category.id'), primary_key=True))
-
-# Other tables???
-# routes:
-#   chapter_id
-#   room_id
-#   checkpoint_id
-#   room_number
