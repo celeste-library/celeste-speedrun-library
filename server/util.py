@@ -24,4 +24,4 @@ if __name__ == '__main__':
     initial_database_setup()
     print(service.get_chapters())
     print(service.get_checkpoints('city-a'))
-    print(service.get_rooms('city-a-1'))
+    print(service.get_rooms('city-a-1', category='clear'))

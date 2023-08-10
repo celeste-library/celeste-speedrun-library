@@ -14,10 +14,10 @@ def chapter(parent: ChapterParent, side_token: str, side_label: str) -> Chapter:
 
 
 def checkpoint(chapter: Chapter, checkpoint_number: int, name: str) -> Checkpoint:
-    token = chapter.token + '-' + str(checkpoint_number)
+    token = f'{chapter.token}-{str(checkpoint_number)}'
     return Checkpoint(token=token, number=checkpoint_number, name=name, chapter=chapter)
 
 
 def room(checkpoint: Checkpoint, code: str, nickname: str) -> Room:
-    token = checkpoint.chapter.token + '-' + code
+    token = f'{checkpoint.chapter.token}-{code}'
     return Room(token=token, code=code, nickname=nickname, checkpoint=checkpoint, chapter=checkpoint.chapter)

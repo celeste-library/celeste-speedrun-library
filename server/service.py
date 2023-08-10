@@ -29,14 +29,15 @@ def show_checkpoint(checkpoint):
         return api_resource.from_checkpoint(repository.get_checkpoint(session, checkpoint))
 
 
-def get_rooms(checkpoint):
+def get_rooms(checkpoint, **kwargs):
     with Session(engine) as session:
-        return [api_resource.from_room(room, True) for room in repository.get_rooms(session, checkpoint)]
+        return [api_resource.from_room(room, True)
+                for room in repository.get_rooms(session, checkpoint, kwargs.get('category'))]
 
 
-def show_room(room):
+def show_room(room, **kwargs):
     with Session(engine) as session:
-        return api_resource.from_room(repository.get_room(session, room), True)
+        return api_resource.from_room(repository.get_room(session, room, kwargs.get('category')), True)
 
 
 def get_checkpoint_by_room(room):

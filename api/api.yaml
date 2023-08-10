@@ -131,6 +131,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: category
+          in: query
+          description: Speedrun category to filter rooms by
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Success
@@ -151,6 +157,12 @@ paths:
           in: path
           description: Token of the room
           required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Speedrun category to filter rooms by
+          required: false
           schema:
             type: string
       responses:
