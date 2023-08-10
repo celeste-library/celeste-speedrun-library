@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from .tables import Chapter, Checkpoint, LevelCategory, LevelRoute, Room, Strat
 
@@ -35,12 +35,11 @@ def get_rooms(session: Session, checkpoint_token: str, category: str = None) -> 
             route_room_ids = list(session.scalars(select(Room.id)
                                                   .join(LevelRoute.rooms)
                                                   .where(LevelRoute.id.in_(route_ids))))
-            main_rooms = list(session.scalars(select(Room)
-                                              .where(LevelRoute.rooms.and_(LevelRoute.id.in_(route_ids)))
-                                              .join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token))))
-            for main_room in main_rooms:
-                main_room.connected_rooms = [room for room in main_room.connected_rooms if room.id in route_room_ids]
-            return main_rooms
+            return list(session.scalars(select(Room)
+                                        .where(LevelRoute.rooms.and_(LevelRoute.id.in_(route_ids)))
+                                        .join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token))
+                                        .options(joinedload(Room.connected_rooms.and_(Room.id.in_(route_room_ids))))
+                                        ).unique())
     return session.scalars(select(Room).join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token)))
 
 
@@ -55,29 +54,9 @@ def get_room(session: Session, room_token: str, category: str = None) -> Room:
             route_room_ids = list(session.scalars(select(Room.id)
                                                   .join(LevelRoute.rooms)
                                                   .where(LevelRoute.id.in_(route_ids))))
-            main_room = session.scalar(select(Room).where(Room.token == room_token))
-            main_room.connected_rooms = [room for room in main_room.connected_rooms if room.id in route_room_ids]
-            return main_room
-            # TODO: figure out why the generated join stuff just doesn't work
-            # main_room = aliased(Room)
-            # room_connections = aliased(Room)
-            # query = (select(Room)
-            #          .where(Room.token == room_token)
-            #          .filter(room_connections.id.in_(route_rooms))
-            #          .where(room_connections.id.in_(route_rooms))
-            #          .join(room_connections, main_room.connected_rooms)
-            #          .options(joinedload(Room.connected_rooms.and_(room_connections.id.in_(route_rooms))))
-            #          .execution_options(populate_existing=True)
-            #          .join(route_rooms, route_rooms.c.room_id == room_connections.id)
-            #          )
-
-            # room_connections = aliased(Room)
-            # query = (select(Room)
-            #          .where(Room.token == room_token)
-            #          .options(joinedload(Room.connected_rooms.and_(room_connections.id.in_(route_rooms))))
-            #          .execution_options(populate_existing=True))
-            # print(query)
-            # return session.scalar(query)
+            return session.scalar(select(Room)
+                                  .where(Room.token == room_token)
+                                  .options(joinedload(Room.connected_rooms.and_(Room.id.in_(route_room_ids)))))
     return session.scalar(select(Room).where(Room.token == room_token))
 
 
