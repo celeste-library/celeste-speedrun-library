@@ -25,3 +25,4 @@ if __name__ == '__main__':
     print(service.get_chapters())
     print(service.get_checkpoints('city-a'))
     print(service.get_rooms('city-a-1', category='clear'))
+    print(service.show_room('city-a-5', category='clear'))

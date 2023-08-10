@@ -17,4 +17,4 @@ def mariadb_local_url(username: str, password: str, database: str):
     return network_db_url('mariadb', 'mariadbconnector', '127.0.0.1', 3306, username, password, database)
 
 
-engine = create_engine(db_url('sqlite', 'pysqlite', '/temp.db'), echo=False, future=True)
+engine = create_engine(db_url('sqlite', 'pysqlite', '/temp.db'))

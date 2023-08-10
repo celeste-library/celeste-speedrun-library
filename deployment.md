@@ -216,35 +216,53 @@ See [here](https://flask.palletsprojects.com/en/2.2.x/deploying/gunicorn/#runnin
 and [here](https://docs.gunicorn.org/en/stable/deploy.html#systemd) for more details.
 
 # Deploying new changes
-1. Grab the latest changes:
-```
-cd ~/celeste-library/celeste-speedrun-library/
-git pull
-```
-2. Run code generation (if any API changes):
-```
-cd ~/celeste-library/celeste-speedrun-library/api/
-npm run generate
-cd ..
-```
-3. Reload the database from files:
-```
-cd ~/celeste-library/celeste-speedrun-library/server/
-. venv/bin/activate
-python util.py
-deactivate
-```
-4. Restart server:
-```
-sudo systemctl restart gunicorn.service
-```
-5. Build client:
-```
-cd ~/celeste-library/celeste-speedrun-library/client
-npm run build
-sudo cp -r ~/celeste-library/celeste-speedrun-library/client/build/* /var/www/html/
-```
-For local client build:
-```
-scp -r build servername:/home/dev/celeste-library/celeste-speedrun-library/client/build
-```
+The client deploy is done automatically by CircleCI on push to main. Other steps may be added to this in the future.
+
+1. Stop the gunicorn server to free up hardware resources if necessary.
+   ```
+   sudo systemctl stop gunicorn.service
+   ```
+
+2. Grab the latest changes, including any changes to `celeste-metadata` or `celeste-speedrun-data`:
+   ```
+   cd ~/celeste-library/celeste-metadata/
+   git pull
+   cd ~/celeste-library/celeste-speedrun-data/
+   git pull
+   cd ~/celeste-library/celeste-speedrun-library/
+   git pull
+   ```
+
+3. Run code generation (if any API changes):
+   ```
+   cd ~/celeste-library/celeste-speedrun-library/api/
+   npm run generate
+   cd ..
+   ```
+
+4. Reload the database from data files:
+   ```
+   cd ~/celeste-library/celeste-speedrun-library/server/
+   . venv/bin/activate
+   # if any changes to python dependencies, also pip install -r requirements
+   python util.py
+   deactivate
+   ```
+
+5. Build client and copy to www:
+   ```
+   cd ~/celeste-library/celeste-speedrun-library/client
+   npm run build
+   sudo cp -r ~/celeste-library/celeste-speedrun-library/client/build/* /var/www/html/
+   ```
+
+   Or, after building the client locally:
+   ```
+   scp -r build servername:/home/dev/celeste-library/celeste-speedrun-library/client/build
+   sudo cp -r ~/celeste-library/celeste-speedrun-library/client/build/* /var/www/html/
+   ```
+
+6. Restart the gunicorn server:
+   ```
+   sudo systemctl restart gunicorn.service
+   ```
