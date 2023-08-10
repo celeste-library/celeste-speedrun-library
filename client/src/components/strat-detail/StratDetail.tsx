@@ -9,13 +9,13 @@ interface Props {
 
 function stratDescriptionParser(description: string): (string | ReactElement)[] {
   return description.split(/(\[img].*?\[\/img])/)
-      .map(item => {
+      .map((item, index) => {
         if (item.startsWith('[img]') && item.endsWith('[/img]')) {
           const filename = item.replace('[img]', '').replace('[/img]', '');
           const url = `https://media.celestespeed.run/strats/${filename}`;
-          return <img className='inline-media' src={url} alt={filename}/>;
+          return <img key={index} className='inline-media' src={url} alt={filename}/>;
         }
-        return <p>{item}</p>;
+        return <p key={index}>{item}</p>;
       });
 }
 

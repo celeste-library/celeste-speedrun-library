@@ -1,20 +1,16 @@
 import {Breadcrumbs, Container, Link} from '@mui/material';
 import {OrderedMap} from 'immutable';
 import React from 'react';
-import {Link as RouterLink, Outlet, useMatches} from 'react-router-dom';
-import {Filters} from '../../generated';
-
-interface Props {
-  filters?: Filters;
-}
+import {Link as RouterLink, Outlet, useMatches, useSearchParams} from 'react-router-dom';
 
 interface RouteHandle {
   crumbs: (loadedData: any) => [string, string][];
   title: (loadedData: any) => string;
 }
 
-export function ChapterTree({filters}: Props) {
+export function ChapterTree() {
   const matches = useMatches() as {pathname: string, handle: RouteHandle, data: any}[];
+  const [searchParams,] = useSearchParams();
   const crumbs = matches
       .filter(match => match.handle)
       .reduce((breadcrumbs: OrderedMap<string, string>, match) => {
@@ -32,7 +28,9 @@ export function ChapterTree({filters}: Props) {
       <Container>
         <Breadcrumbs aria-label="breadcrumb">
           {crumbs.toArray().map(([path, label]: [string, string]) => (
-              <Link component={RouterLink} to={path} key={path}>{label}</Link>
+              <Link component={RouterLink} to={{pathname: path, search: searchParams.toString()}} key={path}>
+                {label}
+              </Link>
           ))}
         </Breadcrumbs>
         <Outlet />

@@ -27,7 +27,7 @@ export function CategoryFilter({selectedCategory, onCategorySelect}: Props) {
   return (
       <FormControl sx={{m: 1, width: 250}} size="small">
         <InputLabel>Category</InputLabel>
-        <Select label="Category" value={selectedCategory ?? ''} onChange={handleChange}>
+        <Select label="Category" value={selectedCategory} onChange={handleChange}>
           <MenuItem value={undefined}></MenuItem>
           {categories.map(category => (
               <MenuItem key={category.token} value={category.token}>{category.name}</MenuItem>

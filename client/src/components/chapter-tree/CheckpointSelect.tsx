@@ -1,6 +1,6 @@
 import {Card, CardContent, CardHeader} from '@mui/material';
 import React from 'react';
-import {LoaderFunctionArgs, useLoaderData, useNavigate} from 'react-router-dom';
+import {LoaderFunctionArgs, useLoaderData, useNavigate, useSearchParams} from 'react-router-dom';
 import {Checkpoint, DefaultApi} from '../../generated';
 import {CheckpointOverview} from './CheckpointOverview';
 import './CheckpointSelect.css';
@@ -26,6 +26,8 @@ export async function showCheckpointLoader({params}: LoaderFunctionArgs): Promis
 export function CheckpointSelect() {
   const checkpoints = useLoaderData() as Awaited<ReturnType<typeof getCheckpointsLoader>>;
   const navigate = useNavigate();
+  const [searchParams,] = useSearchParams();
+  const navigateWithParams = (url: string) => navigate({pathname: url, search: searchParams.toString()});
   return (
       <Card>
         <CardHeader title="Checkpoints"/>
@@ -33,7 +35,7 @@ export function CheckpointSelect() {
           <div className="checkpoint-group">
             {checkpoints.map((checkpoint: any) =>
                 <CheckpointOverview key={checkpoint.token} checkpoint={checkpoint}
-                                    onClick={() => navigate(checkpoint.token)}></CheckpointOverview>,
+                                    onClick={() => navigateWithParams(checkpoint.token)}></CheckpointOverview>,
             )}
           </div>
         </CardContent>
