@@ -42,3 +42,13 @@ Next you will need to load some data into the database.
 For local development the databases are run from an SQLite database
 (in a file named `temp.db`). If you run `util.py` as a script,
 it will automatically create the databases and load them with the JSON data.
+
+## Dependency management
+Top-level dependencies are listed in `requirements.in`.
+
+Specific versions of the full dependency tree are tracked in `requirements.txt` which is generated using
+[pip-tools](https://github.com/jazzband/pip-tools/). To update this file, install the `pip-tools` package
+in an environment using the version of Python used for this project, and run `pip-compile`:
+```
+pip-compile requirements.in -o requirements.txt
+```
