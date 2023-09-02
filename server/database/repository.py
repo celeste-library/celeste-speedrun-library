@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from .tables import Chapter, Checkpoint, LevelCategory, LevelRoute, Room, Strat
 
@@ -27,36 +27,45 @@ def get_checkpoint(session: Session, checkpoint_token: str) -> Checkpoint:
 
 def get_rooms(session: Session, checkpoint_token: str, category: str = None) -> Iterable[Room]:
     if category:
-        route_ids = list(session.scalars(select(LevelRoute.id)
-                                         .join(LevelRoute.category.and_(LevelCategory.token == category))
-                                         .join(LevelRoute.chapter)
-                                         .join(Chapter.checkpoints.and_(Checkpoint.token == checkpoint_token))))
+        route_ids = list(session.scalars(
+                select(LevelRoute.id)
+                .join(LevelRoute.category.and_(LevelCategory.token == category))
+                .join(LevelRoute.chapter)
+                .join(Chapter.checkpoints.and_(Checkpoint.token == checkpoint_token)))
+        )
         if route_ids:
-            route_room_ids = list(session.scalars(select(Room.id)
-                                                  .join(LevelRoute.rooms)
-                                                  .where(LevelRoute.id.in_(route_ids))))
-            return list(session.scalars(select(Room)
-                                        .where(LevelRoute.rooms.and_(LevelRoute.id.in_(route_ids)))
-                                        .join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token))
-                                        .options(joinedload(Room.connected_rooms.and_(Room.id.in_(route_room_ids))))
-                                        ).unique())
+            return session.scalars(
+                    select(Room)
+                    .where(LevelRoute.rooms.and_(LevelRoute.id.in_(route_ids)))
+                    .join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token))
+                    .options(selectinload(Room.connected_rooms.and_(Room.id.in_(
+                            select(Room.id)
+                            .join(LevelRoute.rooms)
+                            .where(LevelRoute.id.in_(route_ids))
+                    ))))
+            ).unique()
     return session.scalars(select(Room).join(Room.checkpoint.and_(Checkpoint.token == checkpoint_token)))
 
 
 def get_room(session: Session, room_token: str, category: str = None) -> Room:
     if category:
-        route_ids = list(session.scalars(select(LevelRoute.id)
-                                         .join(LevelRoute.category.and_(LevelCategory.token == category))
-                                         .join(LevelRoute.chapter)
-                                         .join(Chapter.checkpoints)
-                                         .join(Checkpoint.rooms.and_(Room.token == room_token))))
+        route_ids = list(session.scalars(
+                select(LevelRoute.id)
+                .join(LevelRoute.category.and_(LevelCategory.token == category))
+                .join(LevelRoute.chapter)
+                .join(Chapter.checkpoints)
+                .join(Checkpoint.rooms.and_(Room.token == room_token)))
+        )
         if route_ids:
-            route_room_ids = list(session.scalars(select(Room.id)
-                                                  .join(LevelRoute.rooms)
-                                                  .where(LevelRoute.id.in_(route_ids))))
-            return session.scalar(select(Room)
-                                  .where(Room.token == room_token)
-                                  .options(joinedload(Room.connected_rooms.and_(Room.id.in_(route_room_ids)))))
+            return session.scalar(
+                    select(Room)
+                    .where(Room.token == room_token)
+                    .options(selectinload(Room.connected_rooms.and_(Room.id.in_(
+                            select(Room.id)
+                            .join(LevelRoute.rooms)
+                            .where(LevelRoute.id.in_(route_ids))
+                    ))))
+            )
     return session.scalar(select(Room).where(Room.token == room_token))
 
 
