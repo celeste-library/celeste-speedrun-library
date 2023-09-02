@@ -1,70 +1,18 @@
 version: 2.1
 
+setup: true
+
 orbs:
-  node: circleci/node@5.1.0
+  path-filtering: circleci/path-filtering@1.0.0
 
 workflows:
-  deploy_frontend:
+  generate-config:
     jobs:
-      - api_generate
-      - client_build:
-          requires:
-            - api_generate
-      - client_deploy:
-          requires:
-            - client_build
-          filters:
-            branches:
-              only: main
-
-jobs:
-  api_generate:
-    docker:
-      - image: cimg/openjdk:8.0-node
-    executor:
-      name: node/default
-      tag: '18.16'
-    working_directory: ~/celeste-speedrun-library/api
-    steps:
-      - checkout:
-          path: ~/celeste-speedrun-library
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          name: Generate source
-          command: npm run generate
-      - persist_to_workspace:
-          root: ~/celeste-speedrun-library
-          paths:
-            - client
-
-  client_build:
-    executor:
-      name: node/default
-      tag: '18.16'
-    working_directory: ~/celeste-speedrun-library/client
-    steps:
-      - attach_workspace:
-          at: ~/celeste-speedrun-library
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          name: Build client
-          command: npm run build
-      - persist_to_workspace:
-          root: ~/celeste-speedrun-library
-          paths:
-            - client/build
-
-  client_deploy:
-    docker:
-      - image: cimg/base:current
-    steps:
-      - attach_workspace:
-          at: ~/celeste-speedrun-library
-      - run:
-          name: Deploy over SSH
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
-            scp -r ~/celeste-speedrun-library/client/build/* $DEPLOY_USER@$DEPLOY_HOST:/var/www/html
+      - path-filtering/filter:
+          base-revision: main
+          config-path: .circleci/continue_config.yml
+          mapping: |
+            api/.* api-change true
+            client/.* frontend-change true
+            server/.* backend-change true
+            server/requirements.txt python-deps-change true
