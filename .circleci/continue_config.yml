@@ -109,5 +109,6 @@ jobs:
               rm -rf /home/$DEPLOY_USER/server/"
             scp -r ~/celeste-speedrun-library/server/ $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/
             ssh $DEPLOY_USER@$DEPLOY_HOST "\
+              chmod +x server/install.sh; \
               cd server && ./install.sh << pipeline.parameters.python-deps-change >>; \
               sudo systemctl restart gunicorn"
