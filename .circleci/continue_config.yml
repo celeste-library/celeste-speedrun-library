@@ -1,0 +1,113 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+
+parameters:
+  api-change:
+    type: boolean
+    default: false
+  frontend-change:
+    type: boolean
+    default: false
+  backend-change:
+    type: boolean
+    default: false
+  python-deps-change:
+    type: boolean
+    default: false
+
+workflows:
+  deploy_frontend:
+    when:
+      or: [<< pipeline.parameters.api-change >>, << pipeline.parameters.frontend-change >>]
+    jobs:
+      - api_generate
+      - client_build:
+          requires:
+            - api_generate
+      - client_deploy:
+          requires:
+            - client_build
+          filters:
+            branches:
+              only: main
+  deploy_backend:
+    when:
+      or: [<< pipeline.parameters.api-change >>, << pipeline.parameters.backend-change >>]
+    jobs:
+      - server_deploy:
+          filters:
+            branches:
+              only: main
+
+jobs:
+  api_generate:
+    docker:
+      - image: cimg/openjdk:8.0-node
+    executor:
+      name: node/default
+      tag: '18.16'
+    working_directory: ~/celeste-speedrun-library/api
+    steps:
+      - checkout:
+          path: ~/celeste-speedrun-library
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Generate source
+          command: npm run generate
+      - persist_to_workspace:
+          root: ~/celeste-speedrun-library
+          paths:
+            - client
+
+  client_build:
+    executor:
+      name: node/default
+      tag: '18.16'
+    working_directory: ~/celeste-speedrun-library/client
+    steps:
+      - attach_workspace:
+          at: ~/celeste-speedrun-library
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Build client
+          command: npm run build
+      - persist_to_workspace:
+          root: ~/celeste-speedrun-library
+          paths:
+            - client/build
+
+  client_deploy:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - attach_workspace:
+          at: ~/celeste-speedrun-library
+      - run:
+          name: Deploy client over SSH
+          command: |
+            mkdir -p ~/.ssh
+            echo "$DEPLOY_HOST $DEPLOY_FINGERPRINT" >> ~/.ssh/known_hosts
+            scp -r ~/celeste-speedrun-library/client/build/* $DEPLOY_USER@$DEPLOY_HOST:/var/www/html
+
+  server_deploy:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout:
+          path: ~/celeste-speedrun-library
+      - run:
+          name: Deploy server over SSH
+          command: |
+            mkdir -p ~/.ssh
+            echo "$DEPLOY_HOST $DEPLOY_FINGERPRINT" >> ~/.ssh/known_hosts
+            ssh $DEPLOY_USER@$DEPLOY_HOST "\
+              sudo systemctl stop gunicorn; \
+              rm -rf /home/$DEPLOY_USER/server/"
+            scp -r ~/celeste-speedrun-library/server/ $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/
+            ssh $DEPLOY_USER@$DEPLOY_HOST "\
+              cd server && ./install.sh << pipeline.parameters.python-deps-change >>; \
+              sudo systemctl restart gunicorn"

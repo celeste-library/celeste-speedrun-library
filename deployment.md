@@ -101,15 +101,9 @@ sudo apt install build-essential python3.10 python3.10-dev python3.10-venv -y
 ### c. Install the server dependencies
 ```
 cd ~/celeste-library/celeste-speedrun-library/server
-python3.10 -m venv venv
-. venv/bin/activate
-pip install wheel
-pip install -r requirements.txt
+./install.sh
 ```
-Load the data into the database:
-```
-python util.py
-```
+This will also load the data into the database.
 
 ### d. Test server
 You should now be able to test the API by running:
@@ -209,18 +203,70 @@ WantedBy=multi-user.target
 ```
 and run
 ```sh
-sudo systemctl enable --now gunicorn.service
+sudo systemctl enable --now gunicorn
 ```
 
 See [here](https://flask.palletsprojects.com/en/2.2.x/deploying/gunicorn/#running)
 and [here](https://docs.gunicorn.org/en/stable/deploy.html#systemd) for more details.
 
-# Deploying new changes
-The client deploy is done automatically by CircleCI on push to main. Other steps may be added to this in the future.
+# Deploying with CircleCI
+
+### On your local machine
+
+Create a new SSH key that will be used to deploy:
+```
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_deploy -N ""
+```
+
+### On the server
+
+Create a new user on the server and create the `.ssh` directory:
+```
+sudo adduser deployer --create-home --user-group --disabled-password
+sudo su deployer
+mkdir ~/.ssh
+```
+Then paste your new public key (`~/.ssh/id_ed25519_deploy.pub` from your local machine) into the new user's
+`~/.ssh/authorized_keys` on the server.
+
+Exit back out and change the owner of the web directory to the new user:
+```
+exit
+sudo chwon -R deployer /var/www/html/
+```
+
+Edit the sudoers file with visudo:
+```
+sudo visudo /etc/sudoers.d/deploy-sudoers
+```
+Paste the following:
+```
+deployer ALL=NOPASSWD: /usr/bin/systemctl stop gunicorn
+deployer ALL=NOPASSWD: /usr/bin/systemctl restart gunicorn
+```
+This will allow the deployer user to stop and restart the gunicorn service.
+
+### In Circle CI
+Under `Project Settings` > `Advanced`, enable "Enable dynamic config using setup workflows".
+
+Under `Project Settings` > `Environment Variables`, add the following variables:
+
+- `DEPLOY_HOST` - The URL or IP address of the server to deploy to.
+- `DEPLOY_USER` - The user to login as on the server to deploy to.
+- `DEPLOY_FINGERPRINT` - Public key of the server to deploy to (e.g. to prevent man-in-the-middle attacks).
+  This can be obtained on the server by running:
+  ```
+  ssh-keyscan -t ed25519 localhost 2>/dev/null | cut -d' ' -f2-
+  ```
+
+Add the private key from `~/.ssh/id_ed25519_deploy` on your local machine under: `SSH Keys` > `Additional SSH Keys`.
+
+# Manually deploying new changes
+CircleCI deploys automatically on push to main. However, the steps to manually deploy are outlined below:
 
 1. Stop the gunicorn server to free up hardware resources if necessary.
    ```
-   sudo systemctl stop gunicorn.service
+   sudo systemctl stop gunicorn
    ```
 
 2. Grab the latest changes, including any changes to `celeste-metadata` or `celeste-speedrun-data`:
@@ -256,7 +302,7 @@ The client deploy is done automatically by CircleCI on push to main. Other steps
    sudo cp -r ~/celeste-library/celeste-speedrun-library/client/build/* /var/www/html/
    ```
 
-   Or, after building the client locally:
+   Or, after building the client locally on another machine:
    ```
    scp -r build servername:/home/dev/celeste-library/celeste-speedrun-library/client/build
    sudo cp -r ~/celeste-library/celeste-speedrun-library/client/build/* /var/www/html/
@@ -264,5 +310,5 @@ The client deploy is done automatically by CircleCI on push to main. Other steps
 
 6. Restart the gunicorn server:
    ```
-   sudo systemctl restart gunicorn.service
+   sudo systemctl restart gunicorn
    ```
