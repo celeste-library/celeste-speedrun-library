@@ -1,0 +1,39 @@
+version: 2.1
+
+parameters:
+  api-change:
+    type: boolean
+    default: false
+  frontend-change:
+    type: boolean
+    default: false
+  backend-change:
+    type: boolean
+    default: false
+  python-deps-change:
+    type: boolean
+    default: false
+  metadata-revision:
+    type: string
+    default: ""
+  speedrun-data-revision:
+    type: string
+    default: ""
+
+workflows:
+  print_params:
+    jobs:
+      - print_params
+
+jobs:
+  print_params:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - run: |
+          echo "api-change << pipeline.parameters.api-change >>"
+          echo "frontend-change << pipeline.parameters.frontend-change >>"
+          echo "backend-change << pipeline.parameters.backend-change >>"
+          echo "python-deps-change << pipeline.parameters.python-deps-change >>"
+          echo "metadata-revision << pipeline.parameters.metadata-revision >>"
+          echo "speedrun-data-revision << pipeline.parameters.speedrun-data-revision >>"

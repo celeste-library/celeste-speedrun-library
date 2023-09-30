@@ -16,6 +16,9 @@ parameters:
   python-deps-change:
     type: boolean
     default: false
+  data-change:
+    type: string
+    default: 0
 
 workflows:
   deploy_frontend:
@@ -28,6 +31,7 @@ workflows:
             - api_generate
       - client_deploy:
           requires:
+            - setup_deploy
             - client_build
           filters:
             branches:
@@ -37,6 +41,9 @@ workflows:
       or: [<< pipeline.parameters.api-change >>, << pipeline.parameters.backend-change >>]
     jobs:
       - server_deploy:
+          requires:
+            - setup_deploy
+            - data_refresh
           filters:
             branches:
               only: main
@@ -58,9 +65,9 @@ jobs:
           name: Generate source
           command: npm run generate
       - persist_to_workspace:
-          root: ~/celeste-speedrun-library
+          root: ~/
           paths:
-            - client
+            - celeste-speedrun-library/client
 
   client_build:
     executor:
@@ -69,45 +76,112 @@ jobs:
     working_directory: ~/celeste-speedrun-library/client
     steps:
       - attach_workspace:
-          at: ~/celeste-speedrun-library
+          at: ~/
       - node/install-packages:
           pkg-manager: npm
       - run:
           name: Build client
           command: npm run build
       - persist_to_workspace:
-          root: ~/celeste-speedrun-library
+          root: ~/
           paths:
-            - client/build
+            - celeste-speedrun-library/client/build
+
+  setup_deploy:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Set up SSH for deploy
+          command: |
+            mkdir -p ~/.ssh
+            echo "$DEPLOY_HOST $DEPLOY_FINGERPRINT" >> ~/.ssh/known_hosts
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .ssh
 
   client_deploy:
     docker:
       - image: cimg/base:current
     steps:
       - attach_workspace:
-          at: ~/celeste-speedrun-library
+          at: ~/
       - run:
-          name: Deploy client over SSH
+          name: Deploy client
+          command: scp -r ~/celeste-speedrun-library/client/build/* $DEPLOY_USER@$DEPLOY_HOST:/var/www/html
+
+  celeste_metadata_fetch:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys:
+            - metadata-cache-<< pipeline.parameters.data-change >>
+      - run:
+          name: Deploy data
           command: |
-            mkdir -p ~/.ssh
-            echo "$DEPLOY_HOST $DEPLOY_FINGERPRINT" >> ~/.ssh/known_hosts
-            scp -r ~/celeste-speedrun-library/client/build/* $DEPLOY_USER@$DEPLOY_HOST:/var/www/html
+            if [ ! -f ~/celeste-metadata/celeste.json ]; then
+              git clone https://github.com/celeste-library/celeste-metadata.git
+            fi
+      - save_cache:
+         key: metadata-cache-<< pipeline.parameters.data-change >>
+         paths:
+           - ~/celeste-metadata/celeste.json
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - celeste-metadata/celeste.json
+
+  celeste_speedrun_data_fetch:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Deploy data
+          command: |
+            git clone https://github.com/celeste-library/celeste-metadata.git
+            git clone https://github.com/celeste-library/celeste-speedrun-data.git
+            mkdir ~/data/
+            cp ~/celeste-metadata/celeste.json ~/data/
+            cp ~/celeste-speedrun-data/routes.json ~/data/
+            cp ~/celeste-speedrun-data/scraped-strats.json ~/data/
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - data
 
   server_deploy:
     docker:
       - image: cimg/base:current
     steps:
+      - attach_workspace:
+          at: ~/
       - checkout:
           path: ~/celeste-speedrun-library
       - run:
-          name: Deploy server over SSH
+          name: Pre-deploy
           command: |
-            mkdir -p ~/.ssh
-            echo "$DEPLOY_HOST $DEPLOY_FINGERPRINT" >> ~/.ssh/known_hosts
             ssh $DEPLOY_USER@$DEPLOY_HOST "\
               sudo systemctl stop gunicorn; \
               rm -rf /home/$DEPLOY_USER/server/"
+      - run:
+          name: Deploy data
+          command: |
+            scp -r ~/celeste-speedrun-data/data/ $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/
+      - run:
+          name: Deploy server
+          command: |
             scp -r ~/celeste-speedrun-library/server/ $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/
+      - run:
+          name: Reload and restart server
+          command: |
             ssh $DEPLOY_USER@$DEPLOY_HOST "\
               chmod +x server/install.sh; \
               cd server && ./install.sh << pipeline.parameters.python-deps-change >>; \

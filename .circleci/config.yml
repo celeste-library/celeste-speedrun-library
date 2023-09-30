@@ -4,11 +4,20 @@ setup: true
 
 orbs:
   path-filtering: circleci/path-filtering@1.0.0
+  continuation: circleci/continuation@1.0.0
 
 workflows:
   generate-config:
     jobs:
-      - path-filtering/filter:
+      - generate-config
+
+jobs:
+  generate-config:
+    executor: path-filtering/default
+    resource_class: small
+    steps:
+      - checkout
+      - path-filtering/set-parameters:
           base-revision: main
           config-path: .circleci/continue_config.yml
           mapping: |
@@ -16,3 +25,15 @@ workflows:
             client/.* frontend-change true
             server/.* backend-change true
             server/requirements.txt python-deps-change true
+          output-path: /tmp/pipeline-parameters.json
+      - run:
+          name: Get revisions
+          command: |
+            metadata_sha=$(git ls-remote https://github.com/celeste-library/celeste-metadata.git main | cut -f1)
+            speedrun_data_sha=$(git ls-remote https://github.com/celeste-library/celeste-speedrun-data.git main | cut -f1)
+            cat  /tmp/pipeline-parameters.json
+            cat  /tmp/pipeline-parameters.json | jq ". + {\"metadata-revision\": \"$metadata_sha\", \"speedrun-data-revision\": \"$speedrun_data_sha\"}"
+            cat  /tmp/pipeline-parameters.json | jq ". + {\"metadata-revision\": \"$metadata_sha\", \"speedrun-data-revision\": \"$speedrun_data_sha\"}" > /tmp/pipeline-parameters.json
+      - continuation/continue:
+          configuration_path: .circleci/show_params.yml
+          parameters: /tmp/pipeline-parameters.json
