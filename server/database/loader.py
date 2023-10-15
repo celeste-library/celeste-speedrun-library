@@ -15,6 +15,8 @@ def load_metadata(session: Session, file: PathLike):
         metadata = json.load(f)
     for token, name in metadata['level_categories'].items():
         session.add(LevelCategory(token=token, name=name))
+    for token, name in metadata['level_categories_internal'].items():
+        session.add(LevelCategory(token=token, name=name))
     for token, name in metadata['full_game_categories'].items():
         session.add(FullGameCategory(token=token, name=name))
     for difficulty in metadata['difficulties']:

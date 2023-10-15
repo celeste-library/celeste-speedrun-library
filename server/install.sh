@@ -11,5 +11,5 @@ if [ "$1" == "true" ]; then
   pip install wheel
 fi
 pip install -r requirements.txt
-python util.py
+python util.py --deploy
 deactivate
