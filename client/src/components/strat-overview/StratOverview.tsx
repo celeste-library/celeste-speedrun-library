@@ -15,30 +15,7 @@ export function StratOverview({strat}: Props) {
         <CardContent>
           <div className="strat-row">
             <div className="strat-info">
-              <table>
-                <tbody>
-                <tr>
-                  <td>Name:</td>
-                  <td>{strat.name}</td>
-                </tr>
-                <tr>
-                  <td>Start Point:</td>
-                  <td>{strat.start}</td>
-                </tr>
-                <tr>
-                  <td>End Point:</td>
-                  <td>{strat.end}</td>
-                </tr>
-                <tr>
-                  <td>Difficulty:</td>
-                  <td>{}</td>
-                </tr>
-                <tr>
-                  <td>Time:</td>
-                  <td>{}</td>
-                </tr>
-                </tbody>
-              </table>
+              <StratDetail strat={strat}></StratDetail>
             </div>
             <div className="strat-media">
               {strat.media?.map((media) => {
@@ -50,9 +27,6 @@ export function StratOverview({strat}: Props) {
                 return null;
               })}
             </div>
-          </div>
-          <div>
-            <StratDetail strat={strat}></StratDetail>
           </div>
         </CardContent>
       </Card>
