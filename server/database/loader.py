@@ -105,11 +105,4 @@ def load_all_data(session: Session, metadata_root: Path, speedrun_data_root: Pat
     load_metadata(session, speedrun_data_root.joinpath('metadata.json'))
     load_chapter_tree(session, metadata_root.joinpath('celeste.json'))
     load_routes(session, speedrun_data_root.joinpath('routes.json'))
-    chapters = session.scalars(select(Chapter))
-    for chapter in chapters:
-        strats_file = speedrun_data_root.joinpath(chapter.relative_path, 'strats.json')
-        if strats_file.is_file():
-            load_strats(session, strats_file)
-    strats_file = speedrun_data_root.joinpath('scraped-strats.json')
-    if strats_file.is_file():
-        load_strats(session, strats_file)
+    load_strats(session, speedrun_data_root.joinpath('scraped-strats.json'))
