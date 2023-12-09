@@ -106,7 +106,9 @@ jobs:
             echo "$DEPLOY_HOST $DEPLOY_FINGERPRINT" >> ~/.ssh/known_hosts
             ssh $DEPLOY_USER@$DEPLOY_HOST "\
               sudo systemctl stop gunicorn; \
+              mkdir -p /home/$DEPLOY_USER/api/; \
               rm -rf /home/$DEPLOY_USER/server/"
+            scp -r ~/celeste-speedrun-library/api/api.yaml $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/api/
             scp -r ~/celeste-speedrun-library/server/ $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/
             ssh $DEPLOY_USER@$DEPLOY_HOST "\
               chmod +x server/install.sh; \

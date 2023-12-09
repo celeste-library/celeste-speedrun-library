@@ -7,9 +7,7 @@ if [ "$1" == "true" ]; then
 fi
 if [ ! -d venv ]; then
   python3.10 -m venv venv
-fi
-if [ "$1" == "true" ]; then
   venv/bin/pip install wheel
+  venv/bin/pip install -r requirements.txt
 fi
-venv/bin/pip install -r requirements.txt
 venv/bin/python util.py --deploy
