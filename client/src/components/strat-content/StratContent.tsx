@@ -1,11 +1,7 @@
 import React, {ReactElement} from 'react';
 import {Strat} from '../../generated';
 import {Notes} from '../note/Notes';
-import './StratDetail.css';
-
-interface Props {
-  strat: Strat;
-}
+import './StratContent.css';
 
 function stratDescriptionParser(description: string): (string | ReactElement)[] {
   return description.split(/(\[img].*?\[\/img])/)
@@ -19,7 +15,7 @@ function stratDescriptionParser(description: string): (string | ReactElement)[] 
       });
 }
 
-export function StratDetail({strat}: Props) {
+export function StratContent({strat}: {strat: Strat}) {
   return (
       <div className='description-container'>
         {stratDescriptionParser(strat.description ?? '')}

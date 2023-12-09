@@ -3,7 +3,6 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
-import service
 import config
 from database.connector import engine
 from database.loader import load_all_data

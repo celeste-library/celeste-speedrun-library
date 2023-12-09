@@ -12,6 +12,7 @@ import {CheckpointSelect, getCheckpointsLoader, showCheckpointLoader} from './co
 import {getRoomDetailsLoader, RoomDetails} from './components/chapter-tree/RoomDetails';
 import {getRoomsLoader, RoomSelect} from './components/chapter-tree/RoomSelect';
 import {Root} from './components/Root';
+import {getStratLoader, StratDetails} from './components/strat-overview/StratDetails';
 import {DiscordVideo, getAttachmentId} from './components/video-embed/DiscordVideo';
 import {VideoInput} from './components/video-embed/VideoInput';
 import {Chapter, Checkpoint, Room} from './generated';
@@ -80,15 +81,25 @@ const router = createBrowserRouter([
           },
           {
             path: 'room/:roomToken',
-            loader: getRoomDetailsLoader,
-            element: <RoomDetails/>,
-            handle: {
-              crumbs: (room: Room) => [
-                ['/../../' + room.checkpoint?.token, room.checkpoint?.name],
-                ['/../' + room.token, room.code],
-              ],
-              title: (room: Room) => room.code,
-            },
+            children: [
+              {
+                path: '',
+                loader: getRoomDetailsLoader,
+                element: <RoomDetails/>,
+                handle: {
+                  crumbs: (room: Room) => [
+                    ['/../../' + room.checkpoint?.token, room.checkpoint?.name],
+                    ['/../' + room.token, room.code],
+                  ],
+                  title: (room: Room) => room.code,
+                },
+              },
+              {
+                path: ':stratToken',
+                loader: getStratLoader,
+                element: <StratDetails/>,
+              },
+            ],
           },
         ],
       },

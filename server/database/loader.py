@@ -1,3 +1,4 @@
+import hashlib
 import json
 import mimetypes
 from os import PathLike
@@ -79,6 +80,7 @@ def load_strats(session: Session, file: PathLike):
             if len(split) == 1:
                 return split[0], '*'
             return tuple(split)
+        uid = hashlib.sha256(json.dumps(strat_data).encode('utf-8')).hexdigest()
         categories = [category_map[category] for category in strat_data['categories']]
         start_room, start_detail, end_room, end_detail = None, None, None, None
         if 'start' in strat_data and 'end' in strat_data:
@@ -91,12 +93,14 @@ def load_strats(session: Session, file: PathLike):
             **item,
             'mimetype': mimetypes.guess_type(item['url'])[0],
         } for item in strat_data.get('media', [])]
-        strat = Strat(nickname=strat_data.get('name'),
+        strat = Strat(token=uid,
+                      nickname=strat_data.get('name'),
                       description=strat_data['description'],
                       notes=strat_data.get('notes'),
                       categories=categories,
                       rooms=rooms,
                       media=media,
+                      sources=strat_data.get('sources'),
                       start_room=start_room, start_detail=start_detail, end_room=end_room, end_detail=end_detail)
         session.add(strat)
 
@@ -105,11 +109,4 @@ def load_all_data(session: Session, metadata_root: Path, speedrun_data_root: Pat
     load_metadata(session, speedrun_data_root.joinpath('metadata.json'))
     load_chapter_tree(session, metadata_root.joinpath('celeste.json'))
     load_routes(session, speedrun_data_root.joinpath('routes.json'))
-    chapters = session.scalars(select(Chapter))
-    for chapter in chapters:
-        strats_file = speedrun_data_root.joinpath(chapter.relative_path, 'strats.json')
-        if strats_file.is_file():
-            load_strats(session, strats_file)
-    strats_file = speedrun_data_root.joinpath('scraped-strats.json')
-    if strats_file.is_file():
-        load_strats(session, strats_file)
+    load_strats(session, speedrun_data_root.joinpath('scraped-strats.json'))

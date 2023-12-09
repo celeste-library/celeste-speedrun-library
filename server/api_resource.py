@@ -45,10 +45,12 @@ def from_level_category(category: tables.LevelCategory):
 
 def from_strat(strat: tables.Strat):
     return {
+        'token': strat.token,
         'name': strat.nickname,
         'description': strat.description,
         'notes': strat.notes,
         'media': strat.media,
+        'sources': strat.sources,
         'start': ' '.join((strat.start_room.code, strat.start_detail)) if strat.start_room else None,
         'end': ' '.join((strat.end_room.code, strat.end_detail)) if strat.end_room else None,
     }

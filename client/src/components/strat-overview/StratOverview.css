@@ -1,3 +1,9 @@
+.strat-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .strat-row {
   display: flex;
   flex-direction: row;
@@ -6,6 +12,7 @@
 .strat-info {
   flex-basis: 500px;
   flex-grow: 2;
+  padding-right: 8px;
 }
 
 .strat-media {

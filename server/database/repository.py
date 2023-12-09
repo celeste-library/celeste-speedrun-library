@@ -82,3 +82,7 @@ def get_strats_for_room(session: Session, room_token: str, category: str) -> Ite
     if category is not None:
         query = query.join(Strat.categories.and_(LevelCategory.token == category))
     return session.scalars(query)
+
+
+def get_strat(session: Session, strat_token: str) -> Strat:
+    return session.scalar(select(Strat).where(Strat.token == strat_token))
