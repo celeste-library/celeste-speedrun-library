@@ -1,9 +1,12 @@
-import {Card, CardContent} from '@mui/material';
+import LinkIcon from '@mui/icons-material/Link';
+import {Card, CardContent, IconButton} from '@mui/material';
 import React from 'react';
+import {Link as RouterLink} from 'react-router-dom';
 import {Strat} from '../../generated';
-import {StratDetail} from '../strat-detail/StratDetail';
-import {StratVideo} from '../video-embed/StratVideo';
+import {StratContent} from '../strat-content/StratContent';
+import {StratMedia} from './StratMedia';
 import './StratOverview.css';
+import {StratSources} from './StratSources';
 
 interface Props {
   strat: Strat;
@@ -15,17 +18,16 @@ export function StratOverview({strat}: Props) {
         <CardContent>
           <div className="strat-row">
             <div className="strat-info">
-              <StratDetail strat={strat}></StratDetail>
+              <div className="strat-header">
+                <StratSources sources={strat?.sources}/>
+                <div>
+                  <IconButton component={RouterLink} to={strat.token} relative="route"><LinkIcon/></IconButton>
+                </div>
+              </div>
+              <StratContent strat={strat}></StratContent>
             </div>
             <div className="strat-media">
-              {strat.media?.map((media) => {
-                if (media.mimetype?.startsWith('video')) {
-                  return <StratVideo key={media.url} url={media.url} framerate={media.framerate}/>;
-                } else if (media.mimetype?.startsWith('image')) {
-                  return <img key={media.url} src={media.url} alt=""/>;
-                }
-                return null;
-              })}
+              <StratMedia media={strat.media}></StratMedia>
             </div>
           </div>
         </CardContent>

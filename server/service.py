@@ -54,3 +54,8 @@ def get_strats(room, **kwargs):
     with Session(engine) as session:
         return list(map(api_resource.from_strat,
                         repository.get_strats_for_room(session, room, kwargs.get('category'))))
+
+
+def show_strat(strat):
+    with Session(engine) as session:
+        return api_resource.from_strat(repository.get_strat(session, strat))

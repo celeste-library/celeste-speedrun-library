@@ -121,6 +121,7 @@ route_rooms = Table('route_rooms', Base.metadata,
 class Strat(Base):
     __tablename__ = 'strat'
     id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(unique=True)
     nickname: Mapped[Optional[str]]
     start_room_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('room.id'))
     start_detail: Mapped[Optional[str]]
@@ -129,6 +130,7 @@ class Strat(Base):
     description: Mapped[Optional[str]]
     notes: Mapped[Optional[str]]
     media: Mapped[Optional[dict]]
+    sources: Mapped[Optional[dict]]
     start_room: Mapped[Optional[Room]] = relationship(foreign_keys=start_room_id)
     end_room: Mapped[Optional[Room]] = relationship(foreign_keys=end_room_id)
     rooms: Mapped[list[Room]] = relationship(secondary=room_strats, back_populates='strats')

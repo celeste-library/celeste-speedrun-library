@@ -235,6 +235,26 @@ paths:
                   $ref: '#/components/schemas/Strat'
         '400':
           description: Invalid request
+  /strats/{strat}:
+    get:
+      summary: Show the specified strat
+      operationId: show_strat
+      parameters:
+        - name: strat
+          in: path
+          description: Token of the strat
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Strat'
+        '400':
+          description: Invalid request
 
 
 components:
@@ -329,6 +349,9 @@ components:
       description: A strategy for some portion of a speedrun
       type: object
       properties:
+        token:
+          type: string
+          description: Unique identifier for the strat
         name:
           type: string
         description:
@@ -343,6 +366,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Media'
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Source'
+      required:
+        - token
     Filters:
       title: Filters
       description: Filters for narrowing down selections
@@ -364,3 +393,18 @@ components:
       required:
         - url
         - mimetype
+    Source:
+      title: Source
+      description: Original source of a strat
+      type: object
+      properties:
+        author:
+          type: string
+        url:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - author
+        - url
